@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO | Resolve Repair Requests - Technician Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo p {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .tech-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .tech-badge {
+            background: rgba(59,130,246,0.2);
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.active {
+            border: 2px solid #3b82f6;
+            background: #eff6ff;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #475569;
+        }
+
+        .filter-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Repair Cards Grid */
+        .repairs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .repair-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .repair-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        }
+
+        .repair-header {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            padding: 1.2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .repair-id {
+            font-weight: 700;
+            color: #3b82f6;
+            font-family: monospace;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .status-badge.in-progress { background: #dbeafe; color: #2563eb; }
+        .status-badge.resolved { background: #d1fae5; color: #059669; }
+        .status-badge.urgent { background: #fee2e2; color: #dc2626; }
+
+        .repair-body {
+            padding: 1.2rem;
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .customer-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .customer-details h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .customer-details p {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .device-info {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .device-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .issue-desc {
+            font-size: 0.8rem;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        .repair-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            font-size: 0.75rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #64748b;
+        }
+
+        .progress-section {
+            margin: 1rem 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            margin-bottom: 0.3rem;
+            color: #64748b;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: #334155;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+        }
+
+        .resolution-note {
+            background: #f1f5f9;
+            padding: 0.8rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1100;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .repairs-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <h1><i class="fas fa-tools"></i> REPTO Tech Portal</h1>
+            <p>Repair Request Resolution System</p>
+        </div>
+        <div class="tech-info">
+            <span class="tech-badge"><i class="fas fa-user-cog"></i> Technician: Rajesh Kumar</span>
+            <button class="back-btn" onclick="window.location.href='admin-dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" id="filterTabs">
+            <button class="filter-btn active" data-filter="all">All Requests</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="in-progress">In Progress</button>
+            <button class="filter-btn" data-filter="resolved">Resolved</button>
+            <button class="filter-btn" data-filter="urgent">Urgent</button>
+        </div>
+
+        <!-- Repairs Grid -->
+        <div id="repairsGrid" class="repairs-grid"></div>
+    </div>
+
+    <!-- Resolve Modal -->
+    <div id="resolveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle"></i> Resolve Repair Request</h3>
+                <button class="close-modal" onclick="closeResolveModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="resolveModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Request resolved successfully!</span>
+    </div>
+
+    <script>
+        // Repair Requests Data
+        let repairRequests = [
+            {
+                id: 'RPT001',
+                customerName: 'John Doe',
+                customerPhone: '9876543210',
+                customerEmail: 'john@example.com',
+                device: 'iPhone 14 Pro',
+                brand: 'Apple',
+                issue: 'Screen cracked, display flickering, touch not working properly after drop',
+                status: 'in-progress',
+                priority: 'high',
+                cost: 4500,
+                date: '2024-01-15',
+                technician: 'Rajesh Kumar',
+                store: 'Anna Nagar',
+                address: 'No.45, 2nd Avenue, Anna Nagar, Chennai',
+                progress: 60,
+                estimatedCompletion: '2024-01-18',
+                resolution: null,
+                resolvedAt: null,
+                notes: [
+                    { date: '2024-01-15', note: 'Request received', by: 'System' },
+                    { date: '2024-01-16', note: 'Diagnosis completed - Screen replacement needed', by: 'Rajesh Kumar' },
+                    { date: '2024-01-17', note: 'Parts ordered, repair in progress', by: 'Rajesh Kumar' }
+                ]
+            },
+            {
+                id: 'RPT002',
+                customerName: 'Jane Smith',
+                customerPhone: '9876543211',
+                customerEmail: 'jane@example.com',
+                device: 'MacBook Pro',
+                brand: 'Apple',
+                issue: 'Battery not charging, drains quickly, overheating issues, laptop shuts down randomly',
+                status: 'pending',
+                priority: 'urgent',
+                cost: 8500,
+                date: '2024-01-16',
+                technician: 'Unassigned',
+                store: 'T Nagar',
+                address: 'Tower B, DLF IT Park, Porur, Chennai',
+                progress: 25,
+                estimatedCompletion: '2024-01-20',
+                resolution: null,
+                resolvedAt: null,
+                notes: [
+                    { date: '2024-01-16', note: 'Request received', by: 'System' }
+                ]
+            },
+            {
+                id: 'RPT003',
+                customerName: 'Mike Johnson',
+                customerPhone: '9876543212',
+                customerEmail: 'mike@example.com',
+                device: 'Samsung TV',
+                brand: 'Samsung',
+                issue: 'No power, won\'t turn on, black screen, power supply issue',
+                status: 'pending',
+                priority: 'medium',
+                cost: 3500,
+                date: '2024-01-17',
+                technician: 'Unassigned',
+                store: 'Velachery',
+                address: 'Velachery, Chennai',
+                progress: 10,
+                estimatedCompletion: '2024-01-21',
+                resolution: null,
+                resolvedAt: null,
+                notes: [
+                    { date: '2024-01-17', note: 'Request received', by: 'System' }
+                ]
+            },
+            {
+                id: 'RPT004',
+                customerName: 'Sarah Williams',
+                customerPhone: '9876543213',
+                customerEmail: 'sarah@example.com',
+                device: 'iPad Air',
+                brand: 'Apple',
+                issue: 'Charging port not working, unable to charge device, intermittent connection',
+                status: 'in-progress',
+                priority: 'high',
+                cost: 2500,
+                date: '2024-01-14',
+                technician: 'Rajesh Kumar',
+                store: 'Adyar',
+                address: 'LB Road, Adyar, Chennai',
+                progress: 75,
+                estimatedCompletion: '2024-01-18',
+                resolution: null,
+                resolvedAt: null,
+                notes: [
+                    { date: '2024-01-14', note: 'Request received', by: 'System' },
+                    { date: '2024-01-15', note: 'Diagnosis: Charging port damaged', by: 'Rajesh Kumar' },
+                    { date: '2024-01-16', note: 'Replacement part installed, testing in progress', by: 'Rajesh Kumar' }
+                ]
+            },
+            {
+                id: 'RPT005',
+                customerName: 'David Brown',
+                customerPhone: '9876543214',
+                customerEmail: 'david@example.com',
+                device: 'Dell XPS 15',
+                brand: 'Dell',
+                issue: 'Overheating, fan noise, sudden shutdowns during heavy usage',
+                status: 'resolved',
+                priority: 'medium',
+                cost: 3000,
+                date: '2024-01-10',
+                technician: 'Rajesh Kumar',
+                store: 'T Nagar',
+                address: 'North Usman Road, T Nagar, Chennai',
+                progress: 100,
+                estimatedCompletion: '2024-01-13',
+                resolution: 'Cleaned internal fans, replaced thermal paste, updated BIOS. Device working perfectly now.',
+                resolvedAt: '2024-01-13 04:30 PM',
+                notes: [
+                    { date: '2024-01-10', note: 'Request received', by: 'System' },
+                    { date: '2024-01-11', note: 'Diagnosis: Dust buildup and thermal paste dried out', by: 'Rajesh Kumar' },
+                    { date: '2024-01-12', note: 'Cleaned fans, applied new thermal paste', by: 'Rajesh Kumar' },
+                    { date: '2024-01-13', note: 'Testing complete, device ready', by: 'Rajesh Kumar' }
+                ]
+            }
+        ];
+
+        let currentFilter = 'all';
+        let currentRepair = null;
+
+        // Load data from localStorage (sync with admin and user)
+        function loadData() {
+            const saved = localStorage.getItem('repairRequests');
+            if (saved) {
+                repairRequests = JSON.parse(saved);
+            } else {
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('repairRequests', JSON.stringify(repairRequests));
+            // Also update repairs for admin and user dashboards
+            localStorage.setItem('repairs', JSON.stringify(repairRequests.map(r => ({
+                ...r,
+                status: r.status,
+                progress: r.progress
+            }))));
+            window.dispatchEvent(new StorageEvent('storage', { key: 'repairs', newValue: JSON.stringify(repairRequests) }));
+        }
+
+        // Update stats
+        function updateStats() {
+            const total = repairRequests.length;
+            const pending = repairRequests.filter(r => r.status === 'pending').length;
+            const inProgress = repairRequests.filter(r => r.status === 'in-progress').length;
+            const resolved = repairRequests.filter(r => r.status === 'resolved').length;
+            const urgent = repairRequests.filter(r => r.priority === 'urgent' && r.status !== 'resolved').length;
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card" onclick="filterByStatus('all')">
+                    <div class="stat-value">${total}</div>
+                    <div class="stat-label">Total Requests</div>
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                </div>
+                <div class="stat-card" onclick="filterByStatus('pending')">
+                    <div class="stat-value">${pending}</div>
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                </div>
+                <div class="stat-card" onclick="filterByStatus('in-progress')">
+                    <div class="stat-value">${inProgress}</div>
+                    <div class="stat-label">In Progress</div>
+                    <div class="stat-icon"><i class="fas fa-spinner fa-pulse"></i></div>
+                </div>
+                <div class="stat-card" onclick="filterByStatus('urgent')">
+                    <div class="stat-value">${urgent}</div>
+                    <div class="stat-label">Urgent</div>
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                </div>
+            `;
+        }
+
+        // Render repairs grid
+        function renderRepairs() {
+            let filtered = repairRequests;
+            if (currentFilter === 'pending') {
+                filtered = repairRequests.filter(r => r.status === 'pending');
+            } else if (currentFilter === 'in-progress') {
+                filtered = repairRequests.filter(r => r.status === 'in-progress');
+            } else if (currentFilter === 'resolved') {
+                filtered = repairRequests.filter(r => r.status === 'resolved');
+            } else if (currentFilter === 'urgent') {
+                filtered = repairRequests.filter(r => r.priority === 'urgent' && r.status !== 'resolved');
+            }
+
+            const grid = document.getElementById('repairsGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="text-align: center; padding: 3rem; background: white; border-radius: 24px;">No repair requests found</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(repair => `
+                <div class="repair-card">
+                    <div class="repair-header">
+                        <span class="repair-id"><i class="fas fa-qrcode"></i> ${repair.id}</span>
+                        <span class="status-badge ${repair.status}">
+                            <i class="fas ${repair.status === 'pending' ? 'fa-clock' : repair.status === 'in-progress' ? 'fa-spinner fa-pulse' : 'fa-check-circle'}"></i>
+                            ${repair.status === 'in-progress' ? 'In Progress' : repair.status.charAt(0).toUpperCase() + repair.status.slice(1)}
+                        </span>
+                    </div>
+                    <div class="repair-body">
+                        <div class="customer-info">
+                            <div class="customer-avatar"><i class="fas fa-user"></i></div>
+                            <div class="customer-details">
+                                <h4>${repair.customerName}</h4>
+                                <p><i class="fas fa-phone"></i> ${repair.customerPhone} | <i class="fas fa-envelope"></i> ${repair.customerEmail}</p>
+                            </div>
+                        </div>
+                        <div class="device-info">
+                            <div class="device-name"><i class="fas fa-mobile-alt"></i> ${repair.device} ${repair.brand ? `(${repair.brand})` : ''}</div>
+                            <div class="issue-desc">${repair.issue}</div>
+                        </div>
+                        <div class="repair-details">
+                            <div class="detail-item"><i class="fas fa-calendar"></i> ${repair.date}</div>
+                            <div class="detail-item"><i class="fas fa-rupee-sign"></i> ₹${repair.cost.toLocaleString()}</div>
+                            <div class="detail-item"><i class="fas fa-store"></i> ${repair.store}</div>
+                            <div class="detail-item"><i class="fas fa-calendar-check"></i> Est: ${repair.estimatedCompletion}</div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-label">
+                                <span>Repair Progress</span>
+                                <span>${repair.progress}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${repair.progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            ${repair.status !== 'resolved' ? `
+                                <button class="btn btn-primary" onclick="startRepair('${repair.id}')" ${repair.status === 'in-progress' ? 'disabled' : ''}>
+                                    <i class="fas fa-play"></i> Start Repair
+                                </button>
+                                <button class="btn btn-success" onclick="openResolveModal('${repair.id}')">
+                                    <i class="fas fa-check-circle"></i> Resolve
+                                </button>
+                            ` : `
+                                <div class="resolution-note" style="width: 100%;">
+                                    <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                    <strong>Resolved on:</strong> ${repair.resolvedAt}<br>
+                                    <strong>Resolution:</strong> ${repair.resolution}
+                                </div>
+                            `}
+                            <button class="btn btn-outline" onclick="viewDetails('${repair.id}')">
+                                <i class="fas fa-info-circle"></i> Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Start repair (assign to technician, change status to in-progress)
+        function startRepair(repairId) {
+            const repair = repairRequests.find(r => r.id === repairId);
+            if (repair && repair.status === 'pending') {
+                repair.status = 'in-progress';
+                repair.technician = 'Rajesh Kumar';
+                repair.progress = 25;
+                repair.notes.push({
+                    date: new Date().toLocaleString(),
+                    note: 'Repair started, technician assigned',
+                    by: 'Rajesh Kumar'
+                });
+                saveData();
+                updateStats();
+                renderRepairs();
+                showToast(`Repair ${repairId} has been started`);
+            }
+        }
+
+        // Open resolve modal
+        function openResolveModal(repairId) {
+            currentRepair = repairRequests.find(r => r.id === repairId);
+            if (!currentRepair) return;
+
+            const modalBody = document.getElementById('resolveModalBody');
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <p><strong>Repair ID:</strong> ${currentRepair.id}</p>
+                    <p><strong>Customer:</strong> ${currentRepair.customerName}</p>
+                    <p><strong>Device:</strong> ${currentRepair.device}</p>
+                    <p><strong>Issue:</strong> ${currentRepair.issue}</p>
+                </div>
+                <div class="form-group">
+                    <label>Resolution Details *</label>
+                    <textarea id="resolutionText" rows="4" placeholder="Describe how the issue was resolved, parts replaced, testing done, etc." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Final Cost (₹)</label>
+                    <input type="number" id="finalCost" value="${currentRepair.cost}" placeholder="Final repair cost">
+                </div>
+                <div class="form-group">
+                    <label>Additional Notes (Optional)</label>
+                    <textarea id="additionalNotes" rows="2" placeholder="Any additional information for the customer..."></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-success" style="flex: 1;" onclick="resolveRepair()">
+                        <i class="fas fa-check-circle"></i> Mark as Resolved
+                    </button>
+                    <button class="btn btn-outline" style="flex: 1;" onclick="closeResolveModal()">
+                        Cancel
+                    </button>
+                </div>
+            `;
+            document.getElementById('resolveModal').classList.add('active');
+        }
+
+        // Resolve repair
+        function resolveRepair() {
+            const resolution = document.getElementById('resolutionText').value;
+            if (!resolution) {
+                alert('Please provide resolution details');
+                return;
+            }
+
+            const finalCost = document.getElementById('finalCost').value;
+            const additionalNotes = document.getElementById('additionalNotes').value;
+
+            if (currentRepair) {
+                currentRepair.status = 'resolved';
+                currentRepair.progress = 100;
+                currentRepair.resolution = resolution;
+                currentRepair.resolvedAt = new Date().toLocaleString();
+                currentRepair.cost = parseInt(finalCost) || currentRepair.cost;
+                currentRepair.notes.push({
+                    date: new Date().toLocaleString(),
+                    note: `REPAIR RESOLVED: ${resolution}${additionalNotes ? ' | Additional: ' + additionalNotes : ''}`,
+                    by: 'Rajesh Kumar'
+                });
+                
+                saveData();
+                updateStats();
+                renderRepairs();
+                closeResolveModal();
+                showToast(`Repair ${currentRepair.id} has been resolved successfully! Customer will be notified.`);
+                
+                // Send notification (simulated)
+                console.log(`Notification sent to ${currentRepair.customerEmail}: Your repair is complete!`);
+            }
+        }
+
+        // View repair details
+        function viewDetails(repairId) {
+            const repair = repairRequests.find(r => r.id === repairId);
+            if (!repair) return;
+
+            const modalBody = document.getElementById('resolveModalBody');
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <h4>Repair Details</h4>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; margin-top: 0.5rem;">
+                        <p><strong>ID:</strong> ${repair.id}</p>
+                        <p><strong>Customer:</strong> ${repair.customerName} (${repair.customerPhone})</p>
+                        <p><strong>Device:</strong> ${repair.device} ${repair.brand || ''}</p>
+                        <p><strong>Issue:</strong> ${repair.issue}</p>
+                        <p><strong>Status:</strong> <span class="status-badge ${repair.status}">${repair.status}</span></p>
+                        <p><strong>Priority:</strong> <span style="color: ${repair.priority === 'urgent' ? '#dc2626' : '#f59e0b'}">${repair.priority.toUpperCase()}</span></p>
+                        <p><strong>Cost:</strong> ₹${repair.cost.toLocaleString()}</p>
+                        <p><strong>Technician:</strong> ${repair.technician}</p>
+                        <p><strong>Store:</strong> ${repair.store}</p>
+                        <p><strong>Address:</strong> ${repair.address}</p>
+                        <p><strong>Submitted:</strong> ${repair.date}</p>
+                        <p><strong>Est. Completion:</strong> ${repair.estimatedCompletion}</p>
+                        ${repair.resolvedAt ? `<p><strong>Resolved At:</strong> ${repair.resolvedAt}</p>` : ''}
+                        ${repair.resolution ? `<p><strong>Resolution:</strong> ${repair.resolution}</p>` : ''}
+                    </div>
+                    <h4 style="margin-top: 1rem;">Activity Log</h4>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; max-height: 200px; overflow-y: auto;">
+                        ${repair.notes.map(n => `
+                            <div style="padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+                                <small style="color: #64748b;">${n.date}</small>
+                                <p style="font-size: 0.85rem;">${n.note}</p>
+                                <small style="color: #3b82f6;">by: ${n.by}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="closeResolveModal()">Close</button>
+            `;
+            document.getElementById('resolveModal').classList.add('active');
+        }
+
+        // Filter functions
+        function filterByStatus(status) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === status) {
+                    btn.classList.add('active');
+                }
+            });
+            renderRepairs();
+        }
+
+        function closeResolveModal() {
+            document.getElementById('resolveModal').classList.remove('active');
+            currentRepair = null;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize
+        loadData();
+        updateStats();
+        renderRepairs();
+
+        // Add filter button event listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterByStatus(btn.dataset.filter);
+            });
+        });
+
+        // Make functions global
+        window.startRepair = startRepair;
+        window.openResolveModal = openResolveModal;
+        window.resolveRepair = resolveRepair;
+        window.viewDetails = viewDetails;
+        window.closeResolveModal = closeResolveModal;
+        window.filterByStatus = filterByStatus;
+    </script>
+</body>
+</html>

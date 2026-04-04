@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO | Technician Portal - Real Data Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
+        .dashboard-layout { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0a0f2c 0%, #0c112a 100%);
+            color: #e2e8f0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .sidebar::-webkit-scrollbar-thumb { background: #ff9900; border-radius: 10px; }
+        .sidebar-header {
+            padding: 1.8rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 153, 0, 0.3);
+            margin-bottom: 1.5rem;
+            background: rgba(255, 153, 0, 0.05);
+        }
+        .sidebar-header h2 { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #ff9900, #ffb347); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sidebar-header p { font-size: 0.7rem; color: #8b9ac2; margin-top: 0.3rem; }
+        .tech-profile {
+            background: rgba(255, 153, 0, 0.1);
+            margin: 0 1rem 1.5rem 1rem;
+            padding: 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 153, 0, 0.2);
+        }
+        .tech-profile .avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ff9900, #ffb347); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; }
+        .tech-profile h4 { font-size: 0.9rem; margin-bottom: 0.2rem; }
+        .tech-profile p { font-size: 0.7rem; color: #8b9ac2; }
+        .nav-section { padding: 0 1rem; margin-bottom: 1.5rem; }
+        .nav-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #6f7c9f; padding: 0 1rem; margin-bottom: 0.8rem; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #b9c3e6;
+        }
+        .nav-item:hover { background: rgba(255, 153, 0, 0.15); color: #ffb347; transform: translateX(4px); }
+        .nav-item.active { background: linear-gradient(95deg, rgba(255,153,0,0.2), rgba(255,153,0,0.05)); color: #ff9900; border-left: 3px solid #ff9900; }
+        .nav-item i { width: 24px; font-size: 1.2rem; }
+        .nav-item span { font-size: 0.9rem; font-weight: 500; }
+        .nav-badge { margin-left: auto; background: rgba(255, 153, 0, 0.3); padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .logout-item { margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; color: #f87171; }
+        .logout-item:hover { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .sidebar-footer { padding: 1.5rem; font-size: 0.7rem; color: #6f7c9f; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; }
+        .main-content { flex: 1; margin-left: 280px; transition: margin-left 0.3s ease; }
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        .menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #0f172a; }
+        .logo h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #ff9900, #ffb347); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo p { font-size: 0.7rem; color: #64748b; }
+        .tech-info { display: flex; align-items: center; gap: 1.5rem; }
+        .tech-badge { background: #f1f5f9; padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.85rem; font-weight: 500; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 20px; padding: 1.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .stat-label { font-size: 0.85rem; color: #64748b; }
+        .stat-icon { position: absolute; right: 1.5rem; top: 1.5rem; font-size: 2rem; opacity: 0.3; }
+        .filter-tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .filter-btn { padding: 0.6rem 1.5rem; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; background: white; color: #475569; }
+        .filter-btn.active { background: #ff9900; color: white; }
+        .repairs-grid, .stores-grid, .payments-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.5rem; }
+        .repair-card, .store-card, .payment-card { background: white; border-radius: 24px; overflow: hidden; transition: all 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .repair-card:hover, .store-card:hover, .payment-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+        .repair-header, .store-header, .payment-header { background: linear-gradient(135deg, #f8fafc, #ffffff); padding: 1.2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .repair-id, .store-name, .payment-method { font-weight: 700; color: #ff9900; }
+        .status-badge { padding: 0.25rem 0.8rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .status-badge.in-progress { background: #dbeafe; color: #2563eb; }
+        .status-badge.resolved { background: #d1fae5; color: #059669; }
+        .repair-body, .store-body, .payment-body { padding: 1.2rem; }
+        .customer-info, .store-info, .payment-info { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid #e2e8f0; }
+        .customer-avatar, .store-icon, .payment-icon { width: 45px; height: 45px; background: linear-gradient(135deg, #ff9900, #ffb347); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        .device-info { background: #f8fafc; border-radius: 16px; padding: 0.8rem; margin-bottom: 1rem; }
+        .device-name { font-weight: 600; margin-bottom: 0.3rem; }
+        .issue-desc { font-size: 0.8rem; color: #475569; line-height: 1.4; }
+        .repair-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 1rem 0; font-size: 0.75rem; }
+        .detail-item { display: flex; align-items: center; gap: 0.4rem; color: #64748b; }
+        .progress-section { margin: 1rem 0; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 0.3rem; color: #64748b; }
+        .progress-bar { background: #e2e8f0; border-radius: 10px; height: 6px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #ff9900, #ffb347); height: 100%; border-radius: 10px; transition: width 0.3s; }
+        .action-buttons { display: flex; gap: 0.8rem; margin-top: 1rem; flex-wrap: wrap; }
+        .btn { flex: 1; padding: 0.6rem; border-radius: 40px; border: none; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:hover { background: #e68a00; transform: translateY(-2px); }
+        .btn-success { background: #10b981; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #475569; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 2000; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 28px; max-width: 550px; width: 90%; max-height: 85vh; overflow-y: auto; }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        .modal-body { padding: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.3rem; color: #334155; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.7rem; border: 1px solid #e2e8f0; border-radius: 12px; font-family: inherit; }
+        .toast { position: fixed; bottom: 2rem; right: 2rem; background: #10b981; color: white; padding: 1rem 1.5rem; border-radius: 50px; display: none; align-items: center; gap: 0.5rem; z-index: 2100; }
+        .toast.show { display: flex; }
+        .logout-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 3000; align-items: center; justify-content: center; }
+        .logout-modal.active { display: flex; }
+        .logout-modal-card { background: white; max-width: 400px; width: 90%; border-radius: 28px; padding: 2rem; text-align: center; }
+        .empty-state { text-align: center; padding: 3rem; background: white; border-radius: 24px; color: #64748b; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: block; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-tools"></i> REPTO Tech</h2>
+                <p>Professional Repair Management</p>
+            </div>
+            <div class="tech-profile" id="techProfileArea">
+                <div class="avatar"><i class="fas fa-user-cog fa-2x"></i></div>
+                <h4 id="techName">Technician</h4>
+                <p id="techStatus"><i class="fas fa-user"></i> Set up your profile</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title"><i class="fas fa-chart-line"></i> MAIN MENU</div>
+                <div class="nav-item active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard Overview</span></div>
+                <div class="nav-item" data-section="repair-requests"><i class="fas fa-tools"></i><span>Repair Requests</span><span class="nav-badge" id="pendingCount">0</span></div>
+                <div class="nav-item" data-section="in-progress"><i class="fas fa-spinner"></i><span>In Progress</span><span class="nav-badge" id="inProgressCount">0</span></div>
+                <div class="nav-item" data-section="resolved"><i class="fas fa-check-circle"></i><span>Completed Repairs</span><span class="nav-badge" id="resolvedCount">0</span></div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title"><i class="fas fa-store"></i> SERVICES</div>
+                <div class="nav-item" data-section="nearby-stores"><i class="fas fa-map-marker-alt"></i><span>Nearby Repair Stores</span></div>
+                <div class="nav-item" data-section="payments"><i class="fas fa-credit-card"></i><span>Payments & Earnings</span></div>
+                <div class="nav-item" data-section="settings"><i class="fas fa-sliders-h"></i><span>Settings</span></div>
+            </div>
+            <div class="nav-item logout-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></div>
+            <div class="sidebar-footer"><i class="fas fa-shield-alt"></i> Secure Portal<br>&copy; 2024 REPTO</div>
+        </aside>
+
+        <div class="main-content">
+            <div class="header">
+                <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+                <div class="logo"><h1><i class="fas fa-tools"></i> Technician Dashboard</h1><p>Real Data Management System</p></div>
+                <div class="tech-info"><span class="tech-badge" id="earningsDisplay"><i class="fas fa-wallet"></i> Earnings: ₹0</span></div>
+            </div>
+            <div class="container" id="dynamicContent"></div>
+        </div>
+    </div>
+
+    <div id="resolveModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Resolve Repair Request</h3><button class="close-modal" onclick="closeResolveModal()">&times;</button></div><div class="modal-body" id="resolveModalBody"></div></div></div>
+    <div id="logoutModal" class="logout-modal"><div class="logout-modal-card"><i class="fas fa-sign-out-alt" style="font-size: 3rem; color: #ff9900;"></i><h3>Ready to logout?</h3><p>You'll be logged out of the Technician Portal.</p><div style="display: flex; gap: 1rem; justify-content: center;"><button class="btn btn-outline" onclick="closeLogoutModal()">Cancel</button><button class="btn btn-primary" onclick="confirmLogout()">Logout</button></div></div></div>
+    <div id="toast" class="toast"><i class="fas fa-check-circle"></i><span id="toastMessage"></span></div>
+
+    <script>
+        // ========== NO DEMO DATA - COMPLETELY REAL USER DATA STORAGE ==========
+        // Initialize empty storage if not exists
+        if (!localStorage.getItem('repto_tech_repairs')) localStorage.setItem('repto_tech_repairs', JSON.stringify([]));
+        if (!localStorage.getItem('repto_tech_payments')) localStorage.setItem('repto_tech_payments', JSON.stringify([]));
+        if (!localStorage.getItem('repto_tech_profile')) localStorage.setItem('repto_tech_profile', JSON.stringify({ name: '', phone: '', experience: '', rating: 0, reviews: 0 }));
+        if (!localStorage.getItem('repto_tech_settings')) localStorage.setItem('repto_tech_settings', JSON.stringify({ notifications: 'email', workingHours: { start: '09:00', end: '18:00' } }));
+
+        function getRepairs() { return JSON.parse(localStorage.getItem('repto_tech_repairs')) || []; }
+        function saveRepairs(repairs) { localStorage.setItem('repto_tech_repairs', JSON.stringify(repairs)); }
+        function getPayments() { return JSON.parse(localStorage.getItem('repto_tech_payments')) || []; }
+        function savePayments(payments) { localStorage.setItem('repto_tech_payments', JSON.stringify(payments)); }
+        function getTechProfile() { return JSON.parse(localStorage.getItem('repto_tech_profile')) || { name: '', phone: '', experience: '', rating: 0, reviews: 0 }; }
+        function saveTechProfile(profile) { localStorage.setItem('repto_tech_profile', JSON.stringify(profile)); }
+        function getSettings() { return JSON.parse(localStorage.getItem('repto_tech_settings')) || { notifications: 'email', workingHours: { start: '09:00', end: '18:00' } }; }
+        function saveSettings(settings) { localStorage.setItem('repto_tech_settings', JSON.stringify(settings)); }
+
+        let currentSection = 'dashboard';
+        let currentRepair = null;
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function updateBadges() {
+            const repairs = getRepairs();
+            const pending = repairs.filter(r => r.status === 'pending').length;
+            const inProgress = repairs.filter(r => r.status === 'in-progress').length;
+            const resolved = repairs.filter(r => r.status === 'resolved').length;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('inProgressCount').textContent = inProgress;
+            document.getElementById('resolvedCount').textContent = resolved;
+        }
+
+        function updateEarningsDisplay() {
+            const payments = getPayments();
+            const total = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+            document.getElementById('earningsDisplay').innerHTML = `<i class="fas fa-wallet"></i> Earnings: ₹${total.toLocaleString()}`;
+        }
+
+        function updateTechProfileUI() {
+            const profile = getTechProfile();
+            document.getElementById('techName').textContent = profile.name || 'Technician';
+            document.getElementById('techStatus').innerHTML = profile.name ? `<i class="fas fa-star"></i> ${profile.experience || 'Experience not set'}` : `<i class="fas fa-user"></i> Set up your profile`;
+        }
+
+        function renderDashboard() {
+            const repairs = getRepairs();
+            const payments = getPayments();
+            const totalRepairs = repairs.length;
+            const pending = repairs.filter(r => r.status === 'pending').length;
+            const inProgress = repairs.filter(r => r.status === 'in-progress').length;
+            const totalEarnings = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+            document.getElementById('dynamicContent').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="navigateTo('repair-requests')"><div class="stat-value">${totalRepairs}</div><div class="stat-label">Total Repairs</div><div class="stat-icon"><i class="fas fa-tools"></i></div></div>
+                    <div class="stat-card" onclick="navigateTo('repair-requests')"><div class="stat-value">${pending}</div><div class="stat-label">Pending</div><div class="stat-icon"><i class="fas fa-clock"></i></div></div>
+                    <div class="stat-card" onclick="navigateTo('in-progress')"><div class="stat-value">${inProgress}</div><div class="stat-label">In Progress</div><div class="stat-icon"><i class="fas fa-spinner"></i></div></div>
+                    <div class="stat-card" onclick="navigateTo('payments')"><div class="stat-value">₹${totalEarnings.toLocaleString()}</div><div class="stat-label">Total Earnings</div><div class="stat-icon"><i class="fas fa-rupee-sign"></i></div></div>
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all">All Requests</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="in-progress">In Progress</button>
+                    <button class="filter-btn" data-filter="resolved">Resolved</button>
+                </div>
+                <div id="repairsList"></div>
+            `;
+            renderRepairsList('all');
+            attachFilterListeners();
+        }
+
+        function renderRepairsList(filter) {
+            let repairs = getRepairs();
+            if (filter === 'pending') repairs = repairs.filter(r => r.status === 'pending');
+            else if (filter === 'in-progress') repairs = repairs.filter(r => r.status === 'in-progress');
+            else if (filter === 'resolved') repairs = repairs.filter(r => r.status === 'resolved');
+
+            const container = document.getElementById('repairsList');
+            if (!container) return;
+            if (repairs.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No repair requests. Bookings from customers will appear here.</p></div>';
+                return;
+            }
+            container.innerHTML = `<div class="repairs-grid">${repairs.map(repair => `
+                <div class="repair-card">
+                    <div class="repair-header"><span class="repair-id"><i class="fas fa-qrcode"></i> ${repair.id}</span><span class="status-badge ${repair.status}">${repair.status === 'in-progress' ? 'In Progress' : repair.status}</span></div>
+                    <div class="repair-body">
+                        <div class="customer-info"><div class="customer-avatar"><i class="fas fa-user"></i></div><div><h4>${repair.customerName}</h4><p>${repair.customerPhone}</p></div></div>
+                        <div class="device-info"><div class="device-name">${repair.device}</div><div class="issue-desc">${repair.issue}</div></div>
+                        <div class="repair-details"><div class="detail-item"><i class="fas fa-calendar"></i> ${repair.date}</div><div class="detail-item"><i class="fas fa-rupee-sign"></i> ₹${repair.cost || 0}</div></div>
+                        <div class="progress-section"><div class="progress-label"><span>Progress</span><span>${repair.progress || 0}%</span></div><div class="progress-bar"><div class="progress-fill" style="width: ${repair.progress || 0}%"></div></div></div>
+                        <div class="action-buttons">
+                            ${repair.status !== 'resolved' ? `
+                                <button class="btn btn-primary" onclick="startRepair('${repair.id}')" ${repair.status === 'in-progress' ? 'disabled' : ''}><i class="fas fa-play"></i> Start</button>
+                                <button class="btn btn-success" onclick="openResolveModal('${repair.id}')"><i class="fas fa-check-circle"></i> Resolve</button>
+                            ` : `<div style="font-size:0.75rem; color:#10b981;"><i class="fas fa-check-circle"></i> Resolved on ${repair.resolvedAt || repair.date}</div>`}
+                            <button class="btn btn-outline" onclick="viewDetails('${repair.id}')"><i class="fas fa-info-circle"></i> Details</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}</div>`;
+        }
+
+        // Static store information (business locations, not demo data)
+        function renderNearbyStores() {
+            const stores = [
+                { name: 'REPTO Authorized Service Center', distance: '0.5 km', address: 'Anna Nagar, Chennai', rating: 4.8, phone: '044-12345678', timing: '9 AM - 9 PM', services: ['iPhone', 'MacBook', 'Samsung'] },
+                { name: 'TechCare Solutions', distance: '1.2 km', address: 'T Nagar, Chennai', rating: 4.6, phone: '044-87654321', timing: '10 AM - 8 PM', services: ['Mobile', 'Laptop', 'Data Recovery'] }
+            ];
+            document.getElementById('dynamicContent').innerHTML = `
+                <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-store"></i> Nearby Repair Stores</h2>
+                <div class="stores-grid">${stores.map(store => `
+                    <div class="store-card"><div class="store-header"><span class="store-name">${store.name}</span><span class="status-badge resolved">${store.rating} ★</span></div>
+                    <div class="store-body"><div class="store-info"><div class="store-icon"><i class="fas fa-location-dot"></i></div><div><p>${store.address}</p><p>${store.distance} away</p></div></div>
+                    <div class="repair-details"><div class="detail-item"><i class="fas fa-phone"></i> ${store.phone}</div><div class="detail-item"><i class="fas fa-clock"></i> ${store.timing}</div></div>
+                    <button class="btn btn-primary" onclick="showToast('📍 Directions to ${store.name}')"><i class="fas fa-directions"></i> Get Directions</button></div></div>
+                `).join('')}</div>`;
+        }
+
+        function renderPayments() {
+            const payments = getPayments();
+            const total = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+            document.getElementById('dynamicContent').innerHTML = `
+                <h2 style="margin-bottom: 1.5rem;"><i class="fas fa-credit-card"></i> Payments & Earnings</h2>
+                <div class="stats-grid"><div class="stat-card"><div class="stat-value">₹${total.toLocaleString()}</div><div class="stat-label">Total Earnings</div></div>
+                <div class="stat-card"><div class="stat-value">${payments.length}</div><div class="stat-label">Transactions</div></div></div>
+                ${payments.length === 0 ? '<div class="empty-state">No payment records yet. Payments will appear after resolving repairs.</div>' : `
+                <div class="payments-grid">${payments.map(p => `
+                    <div class="payment-card"><div class="payment-header"><span class="payment-method"><i class="fas fa-receipt"></i> ${p.method || 'Online'}</span><span class="status-badge resolved">${p.status}</span></div>
+                    <div class="payment-body"><div class="payment-info"><div class="payment-icon"><i class="fas fa-user"></i></div><div><h4>${p.customer}</h4><p>ID: ${p.id}</p></div></div>
+                    <div class="repair-details"><div class="detail-item"><i class="fas fa-calendar"></i> ${p.date}</div><div class="detail-item"><i class="fas fa-rupee-sign"></i> ₹${p.amount}</div></div>
+                    <button class="btn btn-outline" onclick="showToast('📄 Receipt for ${p.id}')"><i class="fas fa-download"></i> Receipt</button></div></div>
+                `).join('')}</div>`}
+            `;
+        }
+
+        function renderSettings() {
+            const profile = getTechProfile();
+            const settings = getSettings();
+            document.getElementById('dynamicContent').innerHTML = `
+                <div class="repair-card" style="padding:2rem;">
+                    <h3><i class="fas fa-user-cog"></i> Technician Profile</h3>
+                    <div class="form-group"><label>Full Name</label><input type="text" id="techFullName" value="${profile.name || ''}" placeholder="Your name"></div>
+                    <div class="form-group"><label>Phone Number</label><input type="tel" id="techPhone" value="${profile.phone || ''}" placeholder="Contact number"></div>
+                    <div class="form-group"><label>Experience</label><input type="text" id="techExp" value="${profile.experience || ''}" placeholder="e.g., 5+ years in mobile repair"></div>
+                    <h3 style="margin-top:1.5rem;"><i class="fas fa-sliders-h"></i> Preferences</h3>
+                    <div class="form-group"><label>Notification Preferences</label><select id="notifPref"><option ${settings.notifications === 'email' ? 'selected' : ''}>Email</option><option ${settings.notifications === 'sms' ? 'selected' : ''}>SMS</option><option ${settings.notifications === 'both' ? 'selected' : ''}>Both</option></select></div>
+                    <div class="form-group"><label>Working Hours</label><div style="display: flex; gap: 0.5rem;"><input type="time" id="startTime" value="${settings.workingHours?.start || '09:00'}" style="flex:1;"><span>to</span><input type="time" id="endTime" value="${settings.workingHours?.end || '18:00'}" style="flex:1;"></div></div>
+                    <button class="btn btn-primary" onclick="saveSettings()"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            `;
+        }
+
+        function saveSettings() {
+            const name = document.getElementById('techFullName')?.value || '';
+            const phone = document.getElementById('techPhone')?.value || '';
+            const experience = document.getElementById('techExp')?.value || '';
+            const profile = getTechProfile();
+            profile.name = name;
+            profile.phone = phone;
+            profile.experience = experience;
+            saveTechProfile(profile);
+            
+            const settings = getSettings();
+            settings.notifications = document.getElementById('notifPref')?.value || 'email';
+            settings.workingHours = { start: document.getElementById('startTime')?.value || '09:00', end: document.getElementById('endTime')?.value || '18:00' };
+            saveSettings(settings);
+            updateTechProfileUI();
+            showToast('Settings saved successfully!');
+        }
+
+        function startRepair(id) {
+            const repairs = getRepairs();
+            const repair = repairs.find(r => r.id === id);
+            if (repair && repair.status === 'pending') {
+                repair.status = 'in-progress';
+                repair.progress = 25;
+                saveRepairs(repairs);
+                updateBadges();
+                if (currentSection === 'dashboard') renderDashboard();
+                else if (currentSection === 'repair-requests') renderRepairsList('all');
+                else if (currentSection === 'in-progress') renderRepairsList('in-progress');
+                showToast(`Repair ${id} started!`);
+            }
+        }
+
+        function openResolveModal(id) {
+            const repairs = getRepairs();
+            currentRepair = repairs.find(r => r.id === id);
+            if (!currentRepair) return;
+            const modalBody = document.getElementById('resolveModalBody');
+            modalBody.innerHTML = `
+                <div><p><strong>Repair ID:</strong> ${currentRepair.id}</p><p><strong>Customer:</strong> ${currentRepair.customerName}</p><p><strong>Device:</strong> ${currentRepair.device}</p><p><strong>Issue:</strong> ${currentRepair.issue}</p></div>
+                <div class="form-group"><label>Resolution Details *</label><textarea id="resolutionText" rows="4" placeholder="Describe how the issue was resolved..."></textarea></div>
+                <div class="form-group"><label>Final Cost (₹)</label><input type="number" id="finalCost" value="${currentRepair.cost || 0}"></div>
+                <div style="display: flex; gap: 1rem;"><button class="btn btn-success" onclick="resolveRepair()">Mark Resolved</button><button class="btn btn-outline" onclick="closeResolveModal()">Cancel</button></div>
+            `;
+            document.getElementById('resolveModal').classList.add('active');
+        }
+
+        function resolveRepair() {
+            const resolution = document.getElementById('resolutionText')?.value;
+            if (!resolution) { alert('Please provide resolution details'); return; }
+            const finalCost = parseInt(document.getElementById('finalCost')?.value) || (currentRepair.cost || 0);
+            const repairs = getRepairs();
+            const repairIndex = repairs.findIndex(r => r.id === currentRepair.id);
+            if (repairIndex !== -1) {
+                repairs[repairIndex].status = 'resolved';
+                repairs[repairIndex].progress = 100;
+                repairs[repairIndex].resolution = resolution;
+                repairs[repairIndex].resolvedAt = new Date().toLocaleDateString();
+                repairs[repairIndex].cost = finalCost;
+                saveRepairs(repairs);
+                
+                const payments = getPayments();
+                payments.push({ id: `PAY${Date.now()}`, customer: currentRepair.customerName, amount: finalCost, date: new Date().toLocaleDateString(), status: 'completed', method: 'Online' });
+                savePayments(payments);
+                updateEarningsDisplay();
+                updateBadges();
+            }
+            closeResolveModal();
+            if (currentSection === 'dashboard') renderDashboard();
+            else if (currentSection === 'repair-requests') renderRepairsList('all');
+            else if (currentSection === 'in-progress') renderRepairsList('in-progress');
+            showToast(`Repair ${currentRepair.id} resolved! Added ₹${finalCost}`);
+        }
+
+        function viewDetails(id) {
+            const repairs = getRepairs();
+            const repair = repairs.find(r => r.id === id);
+            if (repair) alert(`📋 REPAIR DETAILS\n\nID: ${repair.id}\nCustomer: ${repair.customerName}\nPhone: ${repair.customerPhone}\nDevice: ${repair.device}\nIssue: ${repair.issue}\nStatus: ${repair.status}\nProgress: ${repair.progress}%\nCost: ₹${repair.cost}\n${repair.resolvedAt ? `Resolved: ${repair.resolvedAt}\nResolution: ${repair.resolution}` : ''}`);
+        }
+
+        function closeResolveModal() { document.getElementById('resolveModal').classList.remove('active'); currentRepair = null; }
+        function attachFilterListeners() { document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', (e) => { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); renderRepairsList(e.target.dataset.filter); })); }
+
+        function navigateTo(section) {
+            currentSection = section;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const activeNav = document.querySelector(`[data-section="${section}"]`);
+            if (activeNav) activeNav.classList.add('active');
+            if (section === 'dashboard') renderDashboard();
+            else if (section === 'repair-requests') { document.getElementById('dynamicContent').innerHTML = `<div class="filter-tabs"><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="pending">Pending</button><button class="filter-btn" data-filter="in-progress">In Progress</button><button class="filter-btn" data-filter="resolved">Resolved</button></div><div id="repairsList"></div>`; renderRepairsList('all'); attachFilterListeners(); }
+            else if (section === 'in-progress') { document.getElementById('dynamicContent').innerHTML = `<h2 style="margin-bottom:1rem;">In Progress Repairs</h2><div id="repairsList"></div>`; renderRepairsList('in-progress'); }
+            else if (section === 'resolved') { document.getElementById('dynamicContent').innerHTML = `<h2 style="margin-bottom:1rem;">Completed Repairs</h2><div id="repairsList"></div>`; renderRepairsList('resolved'); }
+            else if (section === 'nearby-stores') renderNearbyStores();
+            else if (section === 'payments') renderPayments();
+            else if (section === 'settings') renderSettings();
+        }
+
+        function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
+        function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+        function confirmLogout() { showToast("🔐 Logged out successfully"); setTimeout(() => { window.location.href = 'index.html'; }, 500); }
+
+        document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('mobile-open'));
+        document.getElementById('logoutBtn').addEventListener('click', showLogoutModal);
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => item.addEventListener('click', () => { navigateTo(item.dataset.section); if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('mobile-open'); }));
+
+        window.startRepair = startRepair; window.openResolveModal = openResolveModal; window.resolveRepair = resolveRepair; window.viewDetails = viewDetails;
+        window.closeResolveModal = closeResolveModal; window.showToast = showToast; window.navigateTo = navigateTo; window.renderRepairsList = renderRepairsList;
+        window.saveSettings = saveSettings; window.closeLogoutModal = closeLogoutModal; window.confirmLogout = confirmLogout; window.showLogoutModal = showLogoutModal;
+
+        updateTechProfileUI();
+        updateEarningsDisplay();
+        updateBadges();
+        navigateTo('dashboard');
+    </script>
+</body>
+</html>

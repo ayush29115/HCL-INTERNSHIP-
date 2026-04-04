@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPTO · admin · analytics · LIVE DATA</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <!-- Chart.js for advanced charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f4f7fc;
+            color: #1e293b;
+        }
+
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0c1427 0%, #0f1a2f 100%);
+            color: #eef3ff;
+            padding: 32px 20px;
+            border-right: 1px solid #2a3a5a;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 8px 0 24px rgba(0,0,0,0.06);
+        }
+
+        .admin-sidebar h2 {
+            color: #ffb347;
+            font-size: 2rem;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+            font-weight: 700;
+            border-bottom: 2px solid #ff9900;
+            padding-bottom: 20px;
+        }
+
+        .admin-sidebar h2 i {
+            color: #ff9900;
+            background: rgba(255,153,0,0.15);
+            padding: 8px;
+            border-radius: 14px;
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 22px;
+            margin: 6px 0;
+            border-radius: 16px;
+            background: rgba(26, 38, 64, 0.6);
+            border: 1px solid #2e3d5e;
+            color: #dbecff;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .admin-nav-item i {
+            color: #ff9900;
+            width: 24px;
+            font-size: 1.25rem;
+        }
+
+        .admin-nav-item:hover {
+            background: #ff9900;
+            color: #0b1425;
+            border-color: #ff9900;
+            transform: translateX(6px);
+        }
+
+        .admin-nav-item.active {
+            background: #ff9900;
+            color: #0b1425;
+            border-color: #ff9900;
+            font-weight: 600;
+            box-shadow: 0 10px 18px -6px #ff9900;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 36px;
+            font-size: 0.8rem;
+            color: #98a9c7;
+            border-top: 1px dashed #2b3d60;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 36px 42px;
+            background: #f4f7fc;
+            overflow-y: auto;
+        }
+
+        .admin-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .admin-top-bar h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #0b1e42;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .data-badge {
+            background: #e8f0fe;
+            color: #ff9900;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: white;
+            padding: 10px 24px 10px 20px;
+            border-radius: 60px;
+            border: 1px solid #dee9f5;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.02);
+            cursor: pointer;
+        }
+
+        .admin-profile i {
+            font-size: 2rem;
+            color: #ff9900;
+        }
+
+        .date-range-picker {
+            background: white;
+            border-radius: 60px;
+            padding: 12px 24px;
+            border: 1px solid #dee9f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 26px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            border: 1px solid #ecf3fe;
+            box-shadow: 0 18px 40px -14px rgba(0,10,30,0.08);
+            transition: 0.2s;
+        }
+
+        .kpi-card:hover {
+            border-color: #ff9900;
+            transform: translateY(-4px);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .kpi-title {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            background: #ffeed9;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff9900;
+            font-size: 1.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0b1e42;
+            margin-bottom: 8px;
+        }
+
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .trend-up { color: #22a65e; }
+        .trend-down { color: #b91c1c; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 32px;
+            padding: 24px;
+            border: 1px solid #ecf3fe;
+            box-shadow: 0 18px 40px -14px rgba(0,10,30,0.08);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #0b1e42;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .insights-panel {
+            background: white;
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid #ecf3fe;
+            margin-bottom: 40px;
+        }
+
+        .insights-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .insights-header h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #0b1e42;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .insight-card {
+            background: #f8fafd;
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .insight-icon {
+            width: 48px;
+            height: 48px;
+            background: #ffeed9;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff9900;
+            font-size: 1.3rem;
+        }
+
+        .insight-content {
+            flex: 1;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: #0b1e42;
+            margin-bottom: 4px;
+        }
+
+        .insight-desc {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .insight-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .insight-value {
+            font-weight: 700;
+            color: #ff9900;
+        }
+
+        .data-table-container {
+            background: white;
+            border-radius: 32px;
+            border: 1px solid #ecf3fe;
+            overflow: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 20px;
+            background: #f8fafd;
+            color: #0b1e42;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #ecf3fe;
+        }
+
+        .data-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #ecf3fe;
+        }
+
+        .product-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background-size: cover;
+            background-position: center;
+            background-color: #eaf0f8;
+        }
+
+        .export-btn {
+            background: #ff9900;
+            color: #0b1e42;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .export-btn:hover {
+            background: #ffaa2a;
+            transform: scale(1.02);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,153,0,0.2);
+            border-top-color: #ff9900;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast-message {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #0b1e42; color: white; padding: 16px 40px;
+            border-radius: 60px; z-index: 3000; animation: fadeInOut 2.2s forwards;
+            font-weight: 500; box-shadow: 0 20px 40px rgba(255,153,0,0.3);
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+        }
+
+        .error-placeholder {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 40px;
+            text-align: center;
+            border-radius: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <h2><i class="fas fa-chart-line"></i> REPTO admin</h2>
+            <div class="admin-nav-item" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-tachometer-alt"></i> dashboard
+            </div>
+            <div class="admin-nav-item" onclick="window.location.href='orders.html'">
+                <i class="fas fa-shopping-bag"></i> orders
+            </div>
+            <div class="admin-nav-item" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-boxes"></i> products
+            </div>
+            <div class="admin-nav-item" onclick="window.location.href='user.html'">
+                <i class="fas fa-users"></i> users
+            </div>
+            <div class="admin-nav-item active">
+                <i class="fas fa-chart-pie"></i> analytics
+            </div>
+            <div class="admin-nav-item" onclick="window.location.href='inventory.html'">
+                <i class="fas fa-warehouse"></i> inventory
+            </div>
+            <div class="admin-nav-item" onclick="window.location.href='marketing.html'">
+                <i class="fas fa-bullhorn"></i> marketing
+            </div>
+            <div class="admin-nav-item" onclick="window.location.href='setting.html'">
+                <i class="fas fa-cog"></i> settings
+            </div>
+            <div class="sidebar-footer">
+                <i class="fas fa-database"></i> LIVE DATA · API Connected
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <div class="admin-top-bar">
+                <h1><i class="fas fa-chart-pie" style="color:#ff9900;"></i> analytics <span class="data-badge"><i class="fas fa-sync-alt"></i> Real-time from shop backend</span></h1>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div class="date-range-picker" id="dateRangePicker">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="dateRangeText">Loading...</span>
+                    </div>
+                    <div class="admin-profile" id="adminProfile">
+                        <i class="fas fa-user-shield"></i>
+                        <span id="adminName">Admin</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-grid" id="kpiGrid">
+                <div class="kpi-card"><div class="kpi-header"><span class="kpi-title">loading...</span><div class="kpi-icon"><i class="fas fa-spinner fa-pulse"></i></div></div><div class="kpi-value">—</div></div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-line" style="color:#ff9900;"></i> revenue overview</h3>
+                    </div>
+                    <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-pie" style="color:#ff9900;"></i> sales by category</h3>
+                    </div>
+                    <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-shopping-cart" style="color:#ff9900;"></i> daily orders</h3>
+                        <button class="export-btn" style="padding:8px 20px;" onclick="exportChartData()"><i class="fas fa-download"></i> export</button>
+                    </div>
+                    <div class="chart-container"><canvas id="dailyOrdersChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="insights-panel">
+                <div class="insights-header">
+                    <h3><i class="fas fa-lightbulb" style="color:#ff9900;"></i> key insights</h3>
+                    <span id="insightsTimestamp" style="color:#64748b; font-size:0.9rem;">updating...</span>
+                </div>
+                <div class="insights-grid" id="insightsGrid">Loading insights...</div>
+            </div>
+
+            <div style="margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="font-size:1.3rem; font-weight:600; color:#0b1e42;"><i class="fas fa-fire"></i> top selling products</h3>
+                    <button class="export-btn" onclick="exportProductsCSV()"><i class="fas fa-file-csv"></i> export CSV</button>
+                </div>
+                <div class="data-table-container">
+                    <table class="data-table" id="topProductsTable"><tbody><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody></table>
+                </div>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="font-size:1.3rem; font-weight:600; color:#0b1e42;"><i class="fas fa-users"></i> top customers</h3>
+                </div>
+                <div class="data-table-container">
+                    <table class="data-table" id="topCustomersTable"><tbody><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody></table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+   async function fetchAnalyticsData() {
+    const token = getAuthToken();
+    if (!token) {
+        showToast('Session expired');
+        throw new Error('No auth token');
+    }
+
+    const headers = getHeaders();
+
+    // SIMPLE API CALLS (no fallback)
+    const kpis = await fetch(`${API_BASE_URL}/admin/analytics/kpis`, { headers }).then(res => res.json());
+    const revenueData = await fetch(`${API_BASE_URL}/admin/analytics/revenue`, { headers }).then(res => res.json());
+    const categoryData = await fetch(`${API_BASE_URL}/admin/analytics/categories`, { headers }).then(res => res.json());
+    const dailyOrders = await fetch(`${API_BASE_URL}/admin/analytics/daily-orders`, { headers }).then(res => res.json());
+    const insights = await fetch(`${API_BASE_URL}/admin/analytics/insights`, { headers }).then(res => res.json());
+    const topProducts = await fetch(`${API_BASE_URL}/admin/analytics/top-products`, { headers }).then(res => res.json());
+    const topCustomers = await fetch(`${API_BASE_URL}/admin/analytics/top-customers`, { headers }).then(res => res.json());
+
+    return {
+        kpis,
+        revenueData,
+        categoryData,
+        dailyOrders,
+        insights,
+        topProducts,
+        topCustomers
+    };
+}
+</body>
+</html>

@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO Admin | E-Waste Management Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* ========== PREMIUM SIDEBAR ========== */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            overflow: hidden;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-text h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .logo-text p {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+
+        .toggle-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Admin Profile */
+        .admin-profile {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid #0f172a;
+        }
+
+        .admin-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .admin-info h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .admin-info p {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .sidebar.collapsed .admin-info {
+            display: none;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #cbd5e1;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(16,185,129,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(16,185,129,0.2), transparent);
+            color: #10b981;
+            border-left: 3px solid #10b981;
+        }
+
+        .nav-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .nav-item span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+
+        .sidebar.collapsed .nav-badge {
+            display: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .page-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .page-title p {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Content Container */
+        .content-container {
+            padding: 2rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.pending { background: #fef3c7; color: #f59e0b; }
+        .stat-icon.collected { background: #dbeafe; color: #3b82f6; }
+        .stat-icon.progress { background: #c7d2fe; color: #6366f1; }
+        .stat-icon.completed { background: #d1fae5; color: #10b981; }
+        .stat-icon.total { background: #ede9fe; color: #8b5cf6; }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        /* Charts */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Status Badges */
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.pending { background: #fef3c7; color: #d97706; }
+        .status.collected { background: #dbeafe; color: #2563eb; }
+        .status.in-progress { background: #c7d2fe; color: #4f46e5; }
+        .status.completed { background: #d1fae5; color: #059669; }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0 0.2rem;
+        }
+
+        .action-btn.collect { background: #3b82f6; color: white; }
+        .action-btn.progress { background: #6366f1; color: white; }
+        .action-btn.complete { background: #10b981; color: white; }
+        .action-btn.view { background: #64748b; color: white; }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            overflow-x: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .detail-label {
+            width: 120px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1100;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Premium Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fas fa-crown"></i></div>
+                <div class="logo-text">
+                    <h2>REPTO Admin</h2>
+                    <p>E-Waste Management</p>
+                </div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+
+        <div class="admin-profile">
+            <div class="admin-avatar">
+                <i class="fas fa-user-shield"></i>
+                <div class="online-dot"></div>
+            </div>
+            <div class="admin-info">
+                <h4>Admin User</h4>
+                <p>Super Administrator</p>
+            </div>
+        </div>
+
+        <div class="nav-menu">
+            <div class="nav-item active" data-page="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-page="all-requests">
+                <i class="fas fa-list"></i>
+                <span>All Requests</span>
+                <span class="nav-badge" id="totalBadge">0</span>
+            </div>
+            <div class="nav-item" data-page="pending">
+                <i class="fas fa-clock"></i>
+                <span>Pending Pickup</span>
+                <span class="nav-badge" id="pendingBadge">0</span>
+            </div>
+            <div class="nav-item" data-page="collected">
+                <i class="fas fa-truck"></i>
+                <span>Collected</span>
+                <span class="nav-badge" id="collectedBadge">0</span>
+            </div>
+            <div class="nav-item" data-page="in-progress">
+                <i class="fas fa-spinner fa-pulse"></i>
+                <span>In Progress</span>
+                <span class="nav-badge" id="progressBadge">0</span>
+            </div>
+            <div class="nav-item" data-page="completed">
+                <i class="fas fa-check-circle"></i>
+                <span>Completed</span>
+                <span class="nav-badge" id="completedBadge">0</span>
+            </div>
+            <div class="nav-item" data-page="users">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" data-page="centers">
+                <i class="fas fa-store"></i>
+                <span>Recycling Centers</span>
+            </div>
+            <div class="nav-item" data-page="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="top-bar">
+            <button class="menu-toggle" onclick="toggleMobileSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="page-title">
+                <h1 id="pageTitle">Admin Dashboard</h1>
+                <p id="pageDesc">Manage E-Waste Recycling Operations</p>
+            </div>
+            <div class="admin-actions">
+                <button class="action-btn complete" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+            </div>
+        </div>
+        <div class="content-container" id="contentContainer"></div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMsg">Success</span>
+    </div>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Request Details</h3>
+                <button onclick="closeModal()" style="background:none;border:none;font-size:1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Recycling Data
+        let recyclingData = JSON.parse(localStorage.getItem('adminRecycleData')) || {
+            requests: [
+                { id: 'RCY001', date: '2024-01-15', userName: 'John Doe', phone: '9876543210', email: 'john@email.com', address: 'Anna Nagar, Chennai', items: 'Old Laptop, Mobile Phone', weight: 5.2, status: 'pending', points: 0, timeline: { pendingDate: '2024-01-15', collectedDate: null, progressDate: null, completedDate: null } },
+                { id: 'RCY002', date: '2024-01-20', userName: 'Jane Smith', phone: '9876543211', email: 'jane@email.com', address: 'T Nagar, Chennai', items: 'TV, Washing Machine', weight: 25, status: 'collected', points: 0, timeline: { pendingDate: '2024-01-20', collectedDate: '2024-01-21', progressDate: null, completedDate: null } },
+                { id: 'RCY003', date: '2024-01-25', userName: 'Mike Johnson', phone: '9876543212', email: 'mike@email.com', address: 'Velachery, Chennai', items: 'Batteries, Chargers', weight: 3.5, status: 'in-progress', points: 0, timeline: { pendingDate: '2024-01-25', collectedDate: '2024-01-26', progressDate: '2024-01-27', completedDate: null } },
+                { id: 'RCY004', date: '2024-02-01', userName: 'Sarah Wilson', phone: '9876543213', email: 'sarah@email.com', address: 'Adyar, Chennai', items: 'Desktop CPU, Monitor', weight: 12, status: 'completed', points: 120, timeline: { pendingDate: '2024-02-01', collectedDate: '2024-02-02', progressDate: '2024-02-03', completedDate: '2024-02-05' } }
+            ]
+        };
+
+        const centers = [
+            { name: "REPTO Anna Nagar", address: "No.45, 2nd Avenue, Anna Nagar, Chennai", phone: "+91 44 1234 5678", hours: "9AM - 7PM", capacity: "500 kg/day" },
+            { name: "REPTO T Nagar", address: "North Usman Road, T Nagar, Chennai", phone: "+91 44 8765 4321", hours: "10AM - 8PM", capacity: "300 kg/day" },
+            { name: "REPTO Velachery", address: "100 Feet Road, Velachery, Chennai", phone: "+91 44 9876 5432", hours: "9AM - 8PM", capacity: "400 kg/day" },
+            { name: "REPTO Adyar", address: "LB Road, Adyar, Chennai", phone: "+91 44 2345 6789", hours: "10AM - 7PM", capacity: "350 kg/day" }
+        ];
+
+        let currentPage = 'dashboard';
+        let charts = {};
+
+        function updateStats() {
+            const total = recyclingData.requests.length;
+            const pending = recyclingData.requests.filter(r => r.status === 'pending').length;
+            const collected = recyclingData.requests.filter(r => r.status === 'collected').length;
+            const inProgress = recyclingData.requests.filter(r => r.status === 'in-progress').length;
+            const completed = recyclingData.requests.filter(r => r.status === 'completed').length;
+            const totalWeight = recyclingData.requests.filter(r => r.status === 'completed').reduce((s, r) => s + r.weight, 0);
+            const totalPoints = recyclingData.requests.filter(r => r.status === 'completed').reduce((s, r) => s + r.points, 0);
+            
+            document.getElementById('totalBadge').textContent = total;
+            document.getElementById('pendingBadge').textContent = pending;
+            document.getElementById('collectedBadge').textContent = collected;
+            document.getElementById('progressBadge').textContent = inProgress;
+            document.getElementById('completedBadge').textContent = completed;
+            
+            return { total, pending, collected, inProgress, completed, totalWeight, totalPoints };
+        }
+
+        function updateRequestStatus(requestId, newStatus) {
+            const request = recyclingData.requests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            const today = new Date().toLocaleDateString();
+            
+            if (newStatus === 'collected' && request.status === 'pending') {
+                request.status = 'collected';
+                request.timeline.collectedDate = today;
+                showToast(`✅ Request ${requestId} marked as COLLECTED!`);
+            }
+            else if (newStatus === 'in-progress' && request.status === 'collected') {
+                request.status = 'in-progress';
+                request.timeline.progressDate = today;
+                showToast(`🔧 Request ${requestId} moved to IN-PROGRESS!`);
+            }
+            else if (newStatus === 'completed' && request.status === 'in-progress') {
+                request.status = 'completed';
+                request.timeline.completedDate = today;
+                request.points = Math.floor(request.weight * 10);
+                showToast(`🎉 Request ${requestId} COMPLETED! Awarded ${request.points} points.`);
+            }
+            
+            localStorage.setItem('adminRecycleData', JSON.stringify(recyclingData));
+            renderCurrentPage();
+        }
+
+        function viewDetails(requestId) {
+            const request = recyclingData.requests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            document.getElementById('modalBody').innerHTML = `
+                <div class="detail-row"><div class="detail-label">Request ID:</div><div><strong>${request.id}</strong></div></div>
+                <div class="detail-row"><div class="detail-label">User Name:</div><div>${request.userName}</div></div>
+                <div class="detail-row"><div class="detail-label">Phone:</div><div>${request.phone}</div></div>
+                <div class="detail-row"><div class="detail-label">Email:</div><div>${request.email || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Address:</div><div>${request.address}</div></div>
+                <div class="detail-row"><div class="detail-label">Items:</div><div>${request.items}</div></div>
+                <div class="detail-row"><div class="detail-label">Weight:</div><div>${request.weight} kg</div></div>
+                <div class="detail-row"><div class="detail-label">Status:</div><div><span class="status ${request.status}">${request.status === 'in-progress' ? 'In Progress' : request.status}</span></div></div>
+                <div class="detail-row"><div class="detail-label">Submitted:</div><div>${request.timeline.pendingDate || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Collected:</div><div>${request.timeline.collectedDate || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Processing:</div><div>${request.timeline.progressDate || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Completed:</div><div>${request.timeline.completedDate || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Points Earned:</div><div><strong>${request.points}</strong></div></div>
+            `;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function getActionButtons(request) {
+            if (request.status === 'pending') {
+                return `<button class="action-btn collect" onclick="updateRequestStatus('${request.id}', 'collected')"><i class="fas fa-truck"></i> Mark Collected</button>`;
+            } else if (request.status === 'collected') {
+                return `<button class="action-btn progress" onclick="updateRequestStatus('${request.id}', 'in-progress')"><i class="fas fa-spinner"></i> Start Processing</button>`;
+            } else if (request.status === 'in-progress') {
+                return `<button class="action-btn complete" onclick="updateRequestStatus('${request.id}', 'completed')"><i class="fas fa-check"></i> Mark Completed</button>`;
+            } else {
+                return `<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Completed</span>`;
+            }
+        }
+
+        function renderDashboard() {
+            const stats = updateStats();
+            
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon pending"><i class="fas fa-clock"></i></div><div class="stat-value">${stats.pending}</div><div class="stat-label">Pending Pickup</div></div>
+                    <div class="stat-card"><div class="stat-icon collected"><i class="fas fa-truck"></i></div><div class="stat-value">${stats.collected}</div><div class="stat-label">Collected</div></div>
+                    <div class="stat-card"><div class="stat-icon progress"><i class="fas fa-spinner fa-pulse"></i></div><div class="stat-value">${stats.inProgress}</div><div class="stat-label">In Progress</div></div>
+                    <div class="stat-card"><div class="stat-icon completed"><i class="fas fa-check-circle"></i></div><div class="stat-value">${stats.completed}</div><div class="stat-label">Completed</div></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${stats.total}</div><div class="stat-label">Total Requests</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.totalWeight} kg</div><div class="stat-label">E-Waste Recycled</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.totalPoints}</div><div class="stat-label">Points Awarded</div></div>
+                    <div class="stat-card"><div class="stat-value">${(stats.totalWeight * 2.5).toFixed(1)} kg</div><div class="stat-label">CO₂ Saved</div></div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-card"><h3><i class="fas fa-chart-line"></i> Monthly Collection Trend</h3><canvas id="trendChart"></canvas></div>
+                    <div class="chart-card"><h3><i class="fas fa-chart-pie"></i> Status Distribution</h3><canvas id="statusChart"></canvas></div>
+                </div>
+                <div class="table-container">
+                     <table>
+                        <thead>
+                            <tr><th>ID</th><th>Date</th><th>User</th><th>Items</th><th>Weight</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            ${recyclingData.requests.slice(0,5).map(r => `
+                                 <tr>
+                                    <td><strong>${r.id}</strong></td>
+                                    <td>${r.date}</td>
+                                    <td>${r.userName}</td>
+                                    <td>${r.items.substring(0,25)}${r.items.length > 25 ? '...' : ''}</td>
+                                    <td>${r.weight} kg</td>
+                                    <td><span class="status ${r.status}">${r.status === 'in-progress' ? 'In Progress' : r.status}</span></td>
+                                    <td>
+                                        ${getActionButtons(r)}
+                                        <button class="action-btn view" onclick="viewDetails('${r.id}')"><i class="fas fa-eye"></i> View</button>
+                                    </td>
+                                 </tr>
+                            `).join('')}
+                        </tbody>
+                     </table>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                const monthlyData = [45, 62, 38, 55, 72, stats.totalWeight];
+                if (charts.trend) charts.trend.destroy();
+                charts.trend = new Chart(document.getElementById('trendChart'), {
+                    type: 'line',
+                    data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'E-Waste (kg)', data: monthlyData, borderColor: '#10b981', tension: 0.3, fill: true, backgroundColor: 'rgba(16,185,129,0.1)' }] },
+                    options: { responsive: true }
+                });
+                if (charts.status) charts.status.destroy();
+                charts.status = new Chart(document.getElementById('statusChart'), {
+                    type: 'doughnut',
+                    data: { labels: ['Pending', 'Collected', 'In Progress', 'Completed'], datasets: [{ data: [stats.pending, stats.collected, stats.inProgress, stats.completed], backgroundColor: ['#f59e0b', '#3b82f6', '#6366f1', '#10b981'] }] },
+                    options: { responsive: true }
+                });
+            }, 100);
+        }
+
+        function renderRequests(filter = null) {
+            let filtered = recyclingData.requests;
+            let title = 'All Requests';
+            
+            if (filter === 'pending') { filtered = recyclingData.requests.filter(r => r.status === 'pending'); title = 'Pending Pickup Requests'; }
+            else if (filter === 'collected') { filtered = recyclingData.requests.filter(r => r.status === 'collected'); title = 'Collected Requests'; }
+            else if (filter === 'in-progress') { filtered = recyclingData.requests.filter(r => r.status === 'in-progress'); title = 'In Progress Requests'; }
+            else if (filter === 'completed') { filtered = recyclingData.requests.filter(r => r.status === 'completed'); title = 'Completed Requests'; }
+            
+            document.getElementById('pageDesc').innerHTML = `Manage ${title.toLowerCase()}`;
+            
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Date</th><th>User</th><th>Phone</th><th>Address</th><th>Items</th><th>Weight</th><th>Status</th><th>Timeline</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filtered.map(r => `
+                                <tr>
+                                    <td><strong>${r.id}</strong></td>
+                                    <td>${r.date}</td>
+                                    <td>${r.userName}</td>
+                                    <td>${r.phone}</td>
+                                    <td>${r.address.substring(0,20)}${r.address.length > 20 ? '...' : ''}</td>
+                                    <td>${r.items.substring(0,20)}${r.items.length > 20 ? '...' : ''}</td>
+                                    <td>${r.weight} kg</td>
+                                    <td><span class="status ${r.status}">${r.status === 'in-progress' ? 'In Progress' : r.status}</span></td>
+                                    <td><small>P:${r.timeline.pendingDate || '-'}<br>C:${r.timeline.collectedDate || '-'}<br>PR:${r.timeline.progressDate || '-'}<br>CM:${r.timeline.completedDate || '-'}</small></td>
+                                    <td>
+                                        ${getActionButtons(r)}
+                                        <button class="action-btn view" onclick="viewDetails('${r.id}')"><i class="fas fa-eye"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderUsers() {
+            const users = [...new Map(recyclingData.requests.map(r => [r.userName, r])).values()];
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>User Name</th><th>Phone</th><th>Email</th><th>Address</th><th>Requests</th><th>Recycled (kg)</th><th>Points</th> </thead>
+                        <tbody>
+                            ${users.map(u => {
+                                const userRequests = recyclingData.requests.filter(r => r.userName === u.userName);
+                                const totalWeight = userRequests.filter(r => r.status === 'completed').reduce((s, r) => s + r.weight, 0);
+                                const totalPoints = userRequests.reduce((s, r) => s + r.points, 0);
+                                return `
+                                <tr>
+                                    <td><strong>${u.userName}</strong></td>
+                                    <td>${u.phone}</td>
+                                    <td>${u.email || '-'}</td>
+                                    <td>${u.address}</td>
+                                    <td>${userRequests.length}</td>
+                                    <td>${totalWeight} kg</td>
+                                    <td><span class="status completed">${totalPoints} pts</span></td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderCenters() {
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="stats-grid">
+                    ${centers.map(c => `
+                        <div class="stat-card">
+                            <div class="stat-icon total"><i class="fas fa-store"></i></div>
+                            <h3>${c.name}</h3>
+                            <p><i class="fas fa-location-dot"></i> ${c.address}</p>
+                            <p><i class="fas fa-phone"></i> ${c.phone}</p>
+                            <p><i class="fas fa-clock"></i> ${c.hours}</p>
+                            <p><i class="fas fa-weight-hanging"></i> Capacity: ${c.capacity}</p>
+                            <button class="action-btn view" style="width:100%; margin-top:0.5rem;" onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(c.address)}', '_blank')"><i class="fas fa-directions"></i> Get Directions</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderReports() {
+            const stats = updateStats();
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${stats.total}</div><div>Total Requests</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.totalWeight} kg</div><div>E-Waste Recycled</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.totalPoints}</div><div>Points Awarded</div></div>
+                </div>
+                <div class="chart-card"><h3>Monthly Performance</h3><canvas id="reportChart"></canvas></div>
+                <div style="margin-top:1rem; text-align:center;">
+                    <button class="action-btn complete" onclick="exportData()" style="padding:0.6rem 1.5rem;"><i class="fas fa-download"></i> Download Full Report</button>
+                </div>
+            `;
+            setTimeout(() => {
+                new Chart(document.getElementById('reportChart'), {
+                    type: 'bar',
+                    data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'E-Waste (kg)', data: [45, 62, 38, 55, 72, stats.totalWeight], backgroundColor: '#10b981' }] },
+                    options: { responsive: true }
+                });
+            }, 100);
+        }
+
+        function renderSettings() {
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="chart-card">
+                    <h3>System Settings</h3>
+                    <div style="margin-bottom:1rem;"><label style="display:block; font-weight:600;">Admin Name</label><input type="text" value="Admin User" style="width:100%; padding:0.6rem; border:1px solid #e2e8f0; border-radius:12px;"></div>
+                    <div style="margin-bottom:1rem;"><label style="display:block; font-weight:600;">Email</label><input type="email" value="admin@repto.com" style="width:100%; padding:0.6rem; border:1px solid #e2e8f0; border-radius:12px;"></div>
+                    <div style="margin-bottom:1rem;"><label style="display:block; font-weight:600;">Phone</label><input type="tel" value="+91 98765 43210" style="width:100%; padding:0.6rem; border:1px solid #e2e8f0; border-radius:12px;"></div>
+                    <button class="action-btn complete" onclick="showToast('Settings saved!')" style="width:100%; padding:0.8rem;">Save Changes</button>
+                </div>
+            `;
+        }
+
+        function renderCurrentPage() {
+            if (currentPage === 'dashboard') renderDashboard();
+            else if (currentPage === 'all-requests') renderRequests('all');
+            else if (currentPage === 'pending') renderRequests('pending');
+            else if (currentPage === 'collected') renderRequests('collected');
+            else if (currentPage === 'in-progress') renderRequests('in-progress');
+            else if (currentPage === 'completed') renderRequests('completed');
+            else if (currentPage === 'users') renderUsers();
+            else if (currentPage === 'centers') renderCenters();
+            else if (currentPage === 'reports') renderReports();
+            else if (currentPage === 'settings') renderSettings();
+        }
+
+        function setPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+            
+            const titles = {
+                dashboard: 'Admin Dashboard', 'all-requests': 'All Requests', pending: 'Pending Pickup',
+                collected: 'Collected', 'in-progress': 'In Progress', completed: 'Completed',
+                users: 'Users', centers: 'Recycling Centers', reports: 'Reports', settings: 'Settings'
+            };
+            const descs = {
+                dashboard: 'Overview of recycling operations', 'all-requests': 'View and manage all recycling requests',
+                pending: 'Requests waiting for pickup', collected: 'Items collected from users',
+                'in-progress': 'Items being processed', completed: 'Successfully recycled items',
+                users: 'Registered users', centers: 'Manage recycling centers', reports: 'Generate reports', settings: 'Configure system'
+            };
+            document.getElementById('pageTitle').innerHTML = titles[page];
+            document.getElementById('pageDesc').innerHTML = descs[page];
+            renderCurrentPage();
+        }
+
+        function exportData() {
+            const data = JSON.stringify(recyclingData, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `repto_report_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Report exported successfully!');
+        }
+
+        function showToast(msg) {
+            document.getElementById('toastMsg').innerHTML = msg;
+            document.getElementById('toast').classList.add('show');
+            setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('mainContent').classList.toggle('expanded');
+        }
+
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => setPage(item.dataset.page));
+        });
+
+        updateStats();
+        setPage('dashboard');
+        
+        window.updateRequestStatus = updateRequestStatus;
+        window.viewDetails = viewDetails;
+        window.closeModal = closeModal;
+        window.toggleSidebar = toggleSidebar;
+        window.toggleMobileSidebar = toggleMobileSidebar;
+        window.exportData = exportData;
+    </script>
+</body>
+</html>

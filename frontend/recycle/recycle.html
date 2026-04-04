@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO  | E-Waste Management Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+            --secondary: #3b82f6;
+            --accent: #8b5cf6;
+            --dark: #0f172a;
+            --gray-dark: #334155;
+            --gray: #64748b;
+            --gray-light: #f1f5f9;
+            --white: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--gray);
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notification-icon, .profile-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gray-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .profile-icon {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #064e3b, var(--primary));
+            padding: 4rem 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-dark);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .section-header p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(16,185,129,0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        /* Categories Grid */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .category-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+        }
+
+        .category-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .category-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(16,185,129,0.1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .category-card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .category-card p {
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        /* Form Section */
+        .form-section {
+            background: var(--white);
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .form-section h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-dark);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(16,185,129,0.05);
+        }
+
+        .preview-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16,185,129,0.3);
+        }
+
+        /* Centers Grid */
+        .centers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .center-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .center-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .center-card h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .center-card p {
+            margin: 0.5rem 0;
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        .direction-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .distance-badge {
+            background: rgba(16,185,129,0.1);
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .location-loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+
+        .location-loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Pricing Table */
+        .pricing-table {
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 3rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .pricing-table h2 {
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .pricing-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pricing-table th, .pricing-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .pricing-table th {
+            background: var(--gray-light);
+            font-weight: 600;
+        }
+
+        /* Impact Section */
+        .impact-section {
+            background: linear-gradient(135deg, var(--dark), #1e293b);
+            border-radius: 24px;
+            padding: 2rem;
+            color: white;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .impact-section ul {
+            list-style: none;
+        }
+
+        .impact-section li {
+            margin: 0.8rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.2rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1100;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .fa-spin-custom {
+            animation: spin 1s linear infinite;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            .impact-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-recycle"></i></div>
+                <h1>REPTO </h1>
+            </div>
+            <div class="nav-links">
+                <a onclick="scrollToSection('home')">Home</a>
+                <a onclick="scrollToSection('services')">Services</a>
+                <a onclick="scrollToSection('pickup')">Schedule Pickup</a>
+                <a onclick="scrollToSection('centers')">Drop-off Centers</a>
+                <a onclick="scrollToSection('pricing')">Pricing</a>
+            </div>
+            <div class="header-actions">
+                <div class="notification-icon" onclick="openNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+<div class="profile-icon" onclick="window.location.href='userLogin.html'">                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero" id="home">
+        <h1>Recycle Your E-Waste Responsibly</h1>
+        <p>Washing machine, iron, mixer grinder, fan, fridge, AC, laptop, TV — drop off nearby or get free home pickup. Upload photos for better estimate!</p>
+        <div class="hero-buttons">
+            <button class="btn btn-primary" onclick="scrollToSection('pickup')"><i class="fas fa-truck"></i> Book Free Pickup</button>
+            <button class="btn btn-outline" onclick="scrollToSection('centers')"><i class="fas fa-map-marker-alt"></i> Find Drop-off Point</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Dashboard -->
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <!-- Services Section -->
+        <div id="services">
+            <div class="section-header">
+                <h2>What We Recycle</h2>
+                <p>Complete e-waste recycling solutions for households and businesses</p>
+            </div>
+            <div class="categories-grid" id="categoriesGrid"></div>
+        </div>
+
+        <!-- Pickup Form -->
+        <div id="pickup" class="form-section">
+            <h2><i class="fas fa-truck"></i> Schedule Free Pickup</h2>
+            <form id="pickupForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="phone" required placeholder="10-digit mobile">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Pickup Address *</label>
+                        <textarea id="address" rows="2" required placeholder="Full address with landmark"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Items to Recycle *</label>
+                        <textarea id="items" rows="3" required placeholder="List all items with estimated quantity (e.g., 1 old laptop, 2 mobile phones, 1 TV)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Weight (kg)</label>
+                        <input type="number" id="weight" step="0.1" placeholder="Approximate weight">
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Date</label>
+                        <input type="date" id="preferredDate">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Upload Photos (Optional)</label>
+                        <div class="file-upload-area" onclick="document.getElementById('mediaInput').click()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 1.5rem;"></i>
+                            <p>Click to upload images of your items</p>
+                            <small>Helps us provide better estimate</small>
+                        </div>
+                        <input type="file" id="mediaInput" accept="image/*" multiple style="display: none;">
+                        <div id="previewGrid" class="preview-grid"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Submit Pickup Request</button>
+            </form>
+        </div>
+
+        <!-- Drop-off Centers -->
+        <div id="centers">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <h2><i class="fas fa-location-dot"></i> Nearby Recycling Centers</h2>
+                <button class="btn-submit" style="width: auto; padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark));" onclick="getUserLocation()">
+                    <i class="fas fa-location-dot"></i> Use My Location
+                </button>
+            </div>
+            <div id="centersGrid" class="centers-grid"></div>
+        </div>
+
+        <!-- Pricing Table -->
+        <div id="pricing" class="pricing-table">
+            <h2>Recycling Compensation</h2>
+            <table>
+                <thead>
+                    <tr><th>Device Type</th><th>Working Condition</th><th>Non-Working</th><th>Scrap Value</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Smartphone</td><td>₹500 - ₹5000</td><td>₹100 - ₹500</td><td>₹50 - ₹200</td></tr>
+                    <tr><td>Laptop</td><td>₹1000 - ₹8000</td><td>₹200 - ₹1000</td><td>₹100 - ₹300</td></tr>
+                    <tr><td>Desktop/CPU</td><td>₹500 - ₹3000</td><td>₹100 - ₹500</td><td>₹50 - ₹150</td></tr>
+                    <tr><td>Television</td><td>₹500 - ₹3000</td><td>₹100 - ₹500</td><td>₹50 - ₹150</td></tr>
+                    <tr><td>Batteries (per kg)</td><td colspan="3">₹50 - ₹150</td></tr>
+                </tbody>
+            </table>
+            <p style="padding: 1rem; font-size: 0.8rem; color: var(--gray);"><i class="fas fa-info-circle"></i> Final price determined after inspection. Free pickup for bulk quantities.</p>
+        </div>
+
+        <!-- Impact Section -->
+        <div class="impact-section">
+            <div class="impact-grid">
+                <div>
+                    <h3>Our Environmental Impact</h3>
+                    <p style="margin: 1rem 0;">Every device recycled helps reduce e-waste pollution and recover valuable materials.</p>
+                    <canvas id="impactChart" style="max-height: 180px;"></canvas>
+                </div>
+                <div>
+                    <h3>Certified Recycling</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle" style="color: var(--primary);"></i> ISO 14001 Certified</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--primary);"></i> Data Destruction Certificate</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--primary);"></i> 100% Zero Landfill</li>
+                        <li><i class="fas fa-check-circle" style="color: var(--primary);"></i> CPCB Authorized</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="notificationsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Notifications</h3><button onclick="closeModal('notificationsModal')">&times;</button></div>
+            <div class="modal-body" id="notificationsList"></div>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>My Profile</h3><button onclick="closeModal('profileModal')">&times;</button></div>
+            <div class="modal-body" id="profileContent"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"><i class="fas fa-check-circle"></i><span id="toastMessage">Success!</span></div>
+
+    <script>
+        // Data
+        let ewasteRequests = JSON.parse(localStorage.getItem('ewasteRequests')) || [];
+        let mediaFiles = [];
+
+        // Centers with coordinates for accurate distance calculation
+        const centersWithCoords = [
+            { name: "REPTO Anna Nagar", address: "No.45, 2nd Avenue, Anna Nagar, Chennai", phone: "+91 44 1234 5678", hours: "9AM - 7PM", lat: 13.0827, lng: 80.2107, distance: "2.5 km" },
+            { name: "REPTO T Nagar", address: "North Usman Road, T Nagar, Chennai", phone: "+91 44 8765 4321", hours: "10AM - 8PM", lat: 13.0438, lng: 80.2337, distance: "3.8 km" },
+            { name: "REPTO Velachery", address: "100 Feet Road, Velachery, Chennai", phone: "+91 44 9876 5432", hours: "9AM - 8PM", lat: 12.9791, lng: 80.2208, distance: "5.2 km" },
+            { name: "REPTO Adyar", address: "LB Road, Adyar, Chennai", phone: "+91 44 2345 6789", hours: "10AM - 7PM", lat: 13.0065, lng: 80.2567, distance: "4.5 km" }
+        ];
+
+        let notifications = [
+            { title: "♻️ Special Drive", message: "Extra 20% bonus on bulk recycling this week", time: "2 hours ago" },
+            { title: "✅ Pickup Confirmed", message: "Your e-waste pickup is scheduled for tomorrow", time: "Yesterday" }
+        ];
+
+        // Calculate distance between coordinates
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Get user location and show nearest centers
+        function getUserLocation() {
+            const centersGrid = document.getElementById('centersGrid');
+            centersGrid.innerHTML = '<div class="location-loading"><i class="fas fa-spinner fa-spin-custom"></i><br>Detecting your location...</div>';
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        showToast(`📍 Location detected! Showing nearest centers.`);
+                        displayCentersWithDistance(userLat, userLng);
+                    },
+                    (error) => {
+                        let errorMessage = 'Unable to get your location. ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Please enable location access in your browser settings.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Location information unavailable.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Location request timed out.';
+                                break;
+                            default:
+                                errorMessage += 'Please try again.';
+                        }
+                        showToast(errorMessage);
+                        displayCenters(); // Fallback to regular display
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                showToast('Geolocation is not supported by your browser');
+                displayCenters();
+            }
+        }
+
+        // Display centers with calculated distances
+        function displayCentersWithDistance(userLat, userLng) {
+            const centersWithDistance = centersWithCoords.map(center => ({
+                ...center,
+                distance: calculateDistance(userLat, userLng, center.lat, center.lng)
+            })).sort((a, b) => a.distance - b.distance);
+            
+            document.getElementById('centersGrid').innerHTML = centersWithDistance.map(c => `
+                <div class="center-card">
+                    <h3><i class="fas fa-store"></i> ${c.name}</h3>
+                    <p><i class="fas fa-location-dot"></i> ${c.address}</p>
+                    <p><i class="fas fa-phone"></i> ${c.phone}</p>
+                    <p><i class="fas fa-clock"></i> ${c.hours}</p>
+                    <p><span class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${c.distance.toFixed(1)} km away</span></p>
+                    <button class="direction-btn" onclick="getDirections('${c.address}')">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Regular display with estimated distances
+        function displayCenters() {
+            document.getElementById('centersGrid').innerHTML = centersWithCoords.map(c => `
+                <div class="center-card">
+                    <h3><i class="fas fa-store"></i> ${c.name}</h3>
+                    <p><i class="fas fa-location-dot"></i> ${c.address}</p>
+                    <p><i class="fas fa-phone"></i> ${c.phone}</p>
+                    <p><i class="fas fa-clock"></i> ${c.hours}</p>
+                    <p><span class="distance-badge"><i class="fas fa-map-marker-alt"></i> ${c.distance}</span></p>
+                    <button class="direction-btn" onclick="getDirections('${c.address}')">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function getDirections(address) {
+            window.open(`https://www.google.com/maps/search/${encodeURIComponent(address)}`, '_blank');
+        }
+
+        function updateStats() {
+            const total = ewasteRequests.reduce((s, r) => s + (r.weight || 0), 0);
+            const co2 = (total * 2.5).toFixed(1);
+            const trees = (total / 20).toFixed(1);
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-trash-alt"></i></div><div class="stat-value">${total} kg</div><div class="stat-label">E-Waste Recycled</div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-leaf"></i></div><div class="stat-value">${co2} kg</div><div class="stat-label">CO₂ Saved</div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-mobile-alt"></i></div><div class="stat-value">${ewasteRequests.length}</div><div class="stat-label">Requests</div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-tree"></i></div><div class="stat-value">${trees}</div><div class="stat-label">Trees Saved</div></div>
+            `;
+        }
+
+        function displayCategories() {
+            const categories = [
+                { name: "Mobile & Tablets", icon: "fa-mobile-alt", desc: "Smartphones, tablets, accessories" },
+                { name: "Computers & Laptops", icon: "fa-laptop", desc: "Desktops, laptops, peripherals" },
+                { name: "Home Appliances", icon: "fa-tv", desc: "TV, fridge, AC, washing machine" },
+                { name: "Batteries & Chargers", icon: "fa-battery-full", desc: "All types of batteries" }
+            ];
+            document.getElementById('categoriesGrid').innerHTML = categories.map(c => `
+                <div class="category-card" onclick="selectCategory('${c.name}')">
+                    <div class="category-icon"><i class="fas ${c.icon}"></i></div>
+                    <h3>${c.name}</h3>
+                    <p>${c.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        function selectCategory(category) {
+            document.getElementById('items').value = category + " items for recycling";
+            showToast(`${category} selected! Fill the form to schedule pickup.`);
+            document.getElementById('pickup').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Form submission
+        document.getElementById('pickupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const items = document.getElementById('items').value;
+            
+            if (!name || !phone || !address || !items) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            if (phone.length !== 10 || isNaN(phone)) {
+                alert('Please enter a valid 10-digit phone number');
+                return;
+            }
+            
+            const newRequest = {
+                id: 'EW' + Date.now(),
+                name: name,
+                phone: phone,
+                address: address,
+                items: items,
+                weight: parseFloat(document.getElementById('weight').value) || 0,
+                preferredDate: document.getElementById('preferredDate').value || 'As soon as possible',
+                mediaCount: mediaFiles.length,
+                status: 'pending',
+                submittedAt: new Date().toLocaleString(),
+                pointsEarned: Math.floor((parseFloat(document.getElementById('weight').value) || 0) * 10)
+            };
+            
+            ewasteRequests.unshift(newRequest);
+            localStorage.setItem('ewasteRequests', JSON.stringify(ewasteRequests));
+            updateStats();
+            showToast(`✅ Request submitted! ID: ${newRequest.id} | Points: ${newRequest.pointsEarned}`);
+            this.reset();
+            document.getElementById('previewGrid').innerHTML = '';
+            mediaFiles = [];
+        });
+
+        // File upload preview
+        document.getElementById('mediaInput').addEventListener('change', function(e) {
+            Array.from(e.target.files).forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast(`File ${file.name} exceeds 10MB limit`);
+                    return;
+                }
+                mediaFiles.push(file);
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `<img src="${ev.target.result}"><button onclick="this.parentElement.remove()" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:18px;font-size:10px;">&times;</button>`;
+                    document.getElementById('previewGrid').appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function showToast(msg) {
+            document.getElementById('toastMessage').textContent = msg;
+            document.getElementById('toast').classList.add('show');
+            setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+        }
+
+        function openNotifications() {
+            document.getElementById('notificationsList').innerHTML = notifications.map(n => `
+                <div style="padding:0.8rem; border-bottom:1px solid #e2e8f0;">
+                    <strong>${n.title}</strong>
+                    <p style="font-size:0.85rem; margin:0.3rem 0;">${n.message}</p>
+                    <small style="color:#64748b;">${n.time}</small>
+                </div>
+            `).join('');
+            document.getElementById('notificationsModal').classList.add('active');
+        }
+
+        function openProfile() {
+            const total = ewasteRequests.reduce((s, r) => s + (r.weight || 0), 0);
+            const points = ewasteRequests.reduce((s, r) => s + (r.pointsEarned || 0), 0);
+            document.getElementById('profileContent').innerHTML = `
+                <div style="text-align:center;">
+                    <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                        <i class="fas fa-user" style="font-size:2rem;color:white;"></i>
+                    </div>
+                    <h3>Guest User</h3>
+                    <p>+91 98765 43210</p>
+                    <hr style="margin:1rem 0;">
+                    <p><strong>🌱 Your Impact</strong></p>
+                    <p>Total Recycled: ${total} kg</p>
+                    <p>Green Points: ${points}</p>
+                    <p>Requests: ${ewasteRequests.length}</p>
+                    <hr style="margin:1rem 0;">
+                    <button class="btn-submit" onclick="closeModal('profileModal')">Close</button>
+                </div>
+            `;
+            document.getElementById('profileModal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize charts
+        new Chart(document.getElementById('impactChart'), {
+            type: 'doughnut',
+            data: { labels: ['E-Waste', 'Plastic', 'Metal', 'Glass'], datasets: [{ data: [55, 20, 15, 10], backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'] }] },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } } }
+        });
+
+        // Set min date
+        document.getElementById('preferredDate').min = new Date().toISOString().split('T')[0];
+
+        // Initialize
+        displayCategories();
+        displayCenters();
+        updateStats();
+
+        window.selectCategory = selectCategory;
+        window.getDirections = getDirections;
+        window.openNotifications = openNotifications;
+        window.openProfile = openProfile;
+        window.closeModal = closeModal;
+        window.scrollToSection = scrollToSection;
+        window.getUserLocation = getUserLocation;
+    </script>
+</body>
+</html>

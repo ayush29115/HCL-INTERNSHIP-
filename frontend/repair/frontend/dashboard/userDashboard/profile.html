@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO | My Profile - Account Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Profile Container */
+        .profile-container {
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        /* Cover Section */
+        .cover-section {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            padding: 3rem 2rem 5rem;
+            position: relative;
+        }
+
+        .profile-avatar {
+            position: absolute;
+            bottom: -60px;
+            left: 2rem;
+        }
+
+        .avatar-image {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .avatar-image i {
+            font-size: 3.5rem;
+            color: white;
+        }
+
+        .edit-avatar {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Content Section */
+        .content-section {
+            padding: 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #64748b;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: #3b82f6;
+        }
+
+        .tab.active {
+            color: #3b82f6;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #3b82f6;
+        }
+
+        /* Form Styles */
+        .profile-form {
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59,130,246,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-outline:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        /* Repair History */
+        .history-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .history-device {
+            font-weight: 600;
+        }
+
+        .history-date {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .history-status {
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .history-status.completed { background: #d1fae5; color: #059669; }
+        .history-status.in-progress { background: #dbeafe; color: #2563eb; }
+        .history-status.pending { background: #fef3c7; color: #d97706; }
+
+        /* Address Cards */
+        .address-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .address-card.default {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .address-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .address-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        /* Preferences */
+        .preference-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: #e2e8f0;
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #3b82f6;
+        }
+
+        .toggle-slider {
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .profile-avatar {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .cover-section {
+                text-align: center;
+                padding-bottom: 5rem;
+            }
+            .tabs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#" onclick="history.back()" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+            <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+            <p>Manage your account information and preferences</p>
+        </div>
+
+        <div class="profile-container">
+            <!-- Cover Section -->
+            <div class="cover-section">
+                <div class="profile-avatar">
+                    <div class="avatar-image" id="avatarPreview">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="edit-avatar" onclick="changeAvatar()">
+                        <i class="fas fa-camera" style="font-size: 0.8rem;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="content-section">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('profile')">Profile Information</button>
+                    <button class="tab" onclick="showTab('stats')">Statistics</button>
+                    <button class="tab" onclick="showTab('history')">Repair History</button>
+                    <button class="tab" onclick="showTab('addresses')">Addresses</button>
+                    <button class="tab" onclick="showTab('preferences')">Preferences</button>
+                    <button class="tab" onclick="showTab('security')">Security</button>
+                </div>
+
+                <!-- Profile Information Tab -->
+                <div id="profileTab" class="tab-content">
+                    <form class="profile-form" id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="fullName" placeholder="Enter your full name">
+                            </div>
+                            <div class="form-group">
+                                <label>Display Name</label>
+                                <input type="text" id="displayName" placeholder="How you want to be seen">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="email" placeholder="your@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="phone" placeholder="10-digit mobile number">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="dob">
+                        </div>
+                        <div class="form-group">
+                            <label>Bio / About Me</label>
+                            <textarea id="bio" rows="3" placeholder="Tell us a little about yourself..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Language</label>
+                            <select id="language">
+                                <option value="english">English</option>
+                                <option value="hindi">Hindi</option>
+                                <option value="tamil">Tamil</option>
+                                <option value="telugu">Telugu</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+                            <button type="button" class="btn btn-outline" onclick="resetProfile()">Reset</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Statistics Tab -->
+                <div id="statsTab" class="tab-content" style="display: none;">
+                    <div class="stats-grid" id="statsGrid"></div>
+                    <div style="background: #f8fafc; border-radius: 20px; padding: 1.5rem; margin-top: 1rem;">
+                        <h3 style="margin-bottom: 1rem;">Member Since</h3>
+                        <p id="memberSince">January 2024</p>
+                        <h3 style="margin: 1rem 0 0.5rem;">Membership Level</h3>
+                        <div style="background: #e2e8f0; border-radius: 10px; height: 8px; overflow: hidden;">
+                            <div id="membershipProgress" style="width: 65%; background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; border-radius: 10px;"></div>
+                        </div>
+                        <p style="margin-top: 0.5rem; font-size: 0.85rem;" id="membershipLevel">Gold Member</p>
+                    </div>
+                </div>
+
+                <!-- Repair History Tab -->
+                <div id="historyTab" class="tab-content" style="display: none;">
+                    <div id="repairHistoryList"></div>
+                </div>
+
+                <!-- Addresses Tab -->
+                <div id="addressesTab" class="tab-content" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>Saved Addresses</h3>
+                        <button class="btn btn-primary" onclick="addNewAddress()"><i class="fas fa-plus"></i> Add New Address</button>
+                    </div>
+                    <div id="addressesList"></div>
+                </div>
+
+                <!-- Preferences Tab -->
+                <div id="preferencesTab" class="tab-content" style="display: none;">
+                    <div class="preference-item">
+                        <div>
+                            <h4>Email Notifications</h4>
+                            <p style="font-size: 0.8rem; color: #64748b;">Receive repair updates via email</p>
+                        </div>
+                        <div class="toggle-switch" id="emailToggle" onclick="togglePreference('email')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="preference-item">
+                        <div>
+                            <h4>SMS Alerts</h4>
+                            <p style="font-size: 0.8rem; color: #64748b;">Get SMS notifications for repair status</p>
+                        </div>
+                        <div class="toggle-switch" id="smsToggle" onclick="togglePreference('sms')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="preference-item">
+                        <div>
+                            <h4>WhatsApp Updates</h4>
+                            <p style="font-size: 0.8rem; color: #64748b;">Receive updates on WhatsApp</p>
+                        </div>
+                        <div class="toggle-switch" id="whatsappToggle" onclick="togglePreference('whatsapp')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="preference-item">
+                        <div>
+                            <h4>Promotional Offers</h4>
+                            <p style="font-size: 0.8rem; color: #64748b;">Get special discounts and offers</p>
+                        </div>
+                        <div class="toggle-switch" id="promoToggle" onclick="togglePreference('promo')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div id="securityTab" class="tab-content" style="display: none;">
+                    <div class="profile-form">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPassword" placeholder="Enter current password">
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" placeholder="Enter new password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        </div>
+                        <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+                        
+                        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+                            <h3 style="margin-bottom: 1rem; color: #dc2626;">Danger Zone</h3>
+                            <button class="btn btn-danger" onclick="deactivateAccount()">Deactivate Account</button>
+                            <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">Once deactivated, your data will be removed after 30 days.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample repair data
+        const repairsData = [
+            { id: 'RPT001', device: 'iPhone 14 Pro', date: '2024-01-15', status: 'completed', cost: 4500 },
+            { id: 'RPT002', device: 'MacBook Pro', date: '2024-01-16', status: 'in-progress', cost: 8500 },
+            { id: 'RPT003', device: 'Samsung TV', date: '2024-01-10', status: 'completed', cost: 3500 },
+            { id: 'RPT004', device: 'iPad Air', date: '2024-01-05', status: 'completed', cost: 2500 },
+            { id: 'RPT005', device: 'Dell Laptop', date: '2024-01-18', status: 'pending', cost: 3000 }
+        ];
+
+        // Sample addresses
+        let addresses = [
+            { id: 1, name: 'Home', address: 'No.45, 2nd Avenue, Anna Nagar, Chennai - 600040', phone: '9876543210', isDefault: true },
+            { id: 2, name: 'Office', address: 'Tower B, DLF IT Park, Porur, Chennai - 600116', phone: '9876543211', isDefault: false }
+        ];
+
+        // User preferences
+        let preferences = {
+            email: true,
+            sms: true,
+            whatsapp: false,
+            promo: true
+        };
+
+        // Load user data from localStorage
+        function loadUserData() {
+            const userData = JSON.parse(localStorage.getItem('userProfile')) || {};
+            document.getElementById('fullName').value = userData.fullName || '';
+            document.getElementById('displayName').value = userData.displayName || '';
+            document.getElementById('email').value = userData.email || '';
+            document.getElementById('phone').value = userData.phone || '';
+            document.getElementById('dob').value = userData.dob || '';
+            document.getElementById('bio').value = userData.bio || '';
+            document.getElementById('language').value = userData.language || 'english';
+            
+            // Load preferences
+            const savedPrefs = JSON.parse(localStorage.getItem('userPreferences'));
+            if (savedPrefs) {
+                preferences = savedPrefs;
+            }
+            updateToggleStates();
+        }
+
+        function updateToggleStates() {
+            document.getElementById('emailToggle').classList.toggle('active', preferences.email);
+            document.getElementById('smsToggle').classList.toggle('active', preferences.sms);
+            document.getElementById('whatsappToggle').classList.toggle('active', preferences.whatsapp);
+            document.getElementById('promoToggle').classList.toggle('active', preferences.promo);
+        }
+
+        function saveProfile() {
+            const userData = {
+                fullName: document.getElementById('fullName').value,
+                displayName: document.getElementById('displayName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                dob: document.getElementById('dob').value,
+                bio: document.getElementById('bio').value,
+                language: document.getElementById('language').value,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('userProfile', JSON.stringify(userData));
+            alert('Profile saved successfully!');
+            updateStatsTab();
+        }
+
+        function resetProfile() {
+            if (confirm('Reset all profile changes?')) {
+                loadUserData();
+            }
+        }
+
+        function updateStatsTab() {
+            const userData = JSON.parse(localStorage.getItem('userProfile')) || {};
+            const totalRepairs = repairsData.length;
+            const completedRepairs = repairsData.filter(r => r.status === 'completed').length;
+            const totalSpent = repairsData.reduce((sum, r) => sum + r.cost, 0);
+            const memberSince = 'January 2024';
+            
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card"><div class="stat-value">${totalRepairs}</div><div class="stat-label">Total Repairs</div></div>
+                <div class="stat-card"><div class="stat-value">${completedRepairs}</div><div class="stat-label">Completed</div></div>
+                <div class="stat-card"><div class="stat-value">₹${totalSpent.toLocaleString()}</div><div class="stat-label">Total Spent</div></div>
+                <div class="stat-card"><div class="stat-value">4.8</div><div class="stat-label">Rating ⭐</div></div>
+            `;
+            document.getElementById('memberSince').innerHTML = memberSince;
+            
+            // Update membership level based on total spent
+            let level = 'Silver';
+            let progress = 30;
+            if (totalSpent > 15000) { level = 'Platinum'; progress = 100; }
+            else if (totalSpent > 10000) { level = 'Gold'; progress = 75; }
+            else if (totalSpent > 5000) { level = 'Silver'; progress = 50; }
+            
+            document.getElementById('membershipLevel').innerHTML = `${level} Member`;
+            document.getElementById('membershipProgress').style.width = `${progress}%`;
+        }
+
+        function updateRepairHistory() {
+            const container = document.getElementById('repairHistoryList');
+            container.innerHTML = repairsData.map(repair => `
+                <div class="history-item">
+                    <div>
+                        <div class="history-device">${repair.device}</div>
+                        <div class="history-date">${repair.date} | ID: ${repair.id}</div>
+                    </div>
+                    <div>
+                        <span class="history-status ${repair.status}">${repair.status === 'in-progress' ? 'In Progress' : repair.status}</span>
+                    </div>
+                    <div style="font-weight: 600;">₹${repair.cost}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateAddresses() {
+            const container = document.getElementById('addressesList');
+            container.innerHTML = addresses.map(addr => `
+                <div class="address-card ${addr.isDefault ? 'default' : ''}">
+                    <div class="address-header">
+                        <strong><i class="fas fa-${addr.name === 'Home' ? 'home' : 'building'}"></i> ${addr.name}</strong>
+                        ${addr.isDefault ? '<span class="address-badge">Default</span>' : ''}
+                    </div>
+                    <p style="margin: 0.5rem 0;">${addr.address}</p>
+                    <p><i class="fas fa-phone"></i> ${addr.phone}</p>
+                    <div style="margin-top: 0.5rem;">
+                        ${!addr.isDefault ? `<button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;" onclick="setDefaultAddress(${addr.id})">Set as Default</button>` : ''}
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;" onclick="editAddress(${addr.id})">Edit</button>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.75rem; color: #dc2626;" onclick="deleteAddress(${addr.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addNewAddress() {
+            const name = prompt('Enter address name (e.g., Home, Office):');
+            if (!name) return;
+            const address = prompt('Enter full address:');
+            if (!address) return;
+            const phone = prompt('Enter phone number:');
+            if (!phone) return;
+            
+            addresses.push({
+                id: Date.now(),
+                name: name,
+                address: address,
+                phone: phone,
+                isDefault: addresses.length === 0
+            });
+            localStorage.setItem('userAddresses', JSON.stringify(addresses));
+            updateAddresses();
+        }
+
+        function editAddress(id) {
+            const addr = addresses.find(a => a.id === id);
+            if (!addr) return;
+            const newName = prompt('Edit address name:', addr.name);
+            if (newName) addr.name = newName;
+            const newAddress = prompt('Edit address:', addr.address);
+            if (newAddress) addr.address = newAddress;
+            const newPhone = prompt('Edit phone:', addr.phone);
+            if (newPhone) addr.phone = newPhone;
+            localStorage.setItem('userAddresses', JSON.stringify(addresses));
+            updateAddresses();
+        }
+
+        function deleteAddress(id) {
+            if (confirm('Delete this address?')) {
+                addresses = addresses.filter(a => a.id !== id);
+                localStorage.setItem('userAddresses', JSON.stringify(addresses));
+                updateAddresses();
+            }
+        }
+
+        function setDefaultAddress(id) {
+            addresses.forEach(a => a.isDefault = (a.id === id));
+            localStorage.setItem('userAddresses', JSON.stringify(addresses));
+            updateAddresses();
+        }
+
+        function togglePreference(type) {
+            preferences[type] = !preferences[type];
+            localStorage.setItem('userPreferences', JSON.stringify(preferences));
+            updateToggleStates();
+            alert(`${type.charAt(0).toUpperCase() + type.slice(1)} notifications ${preferences[type] ? 'enabled' : 'disabled'}`);
+        }
+
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (!current || !newPass || !confirm) {
+                alert('Please fill all password fields');
+                return;
+            }
+            if (newPass !== confirm) {
+                alert('New passwords do not match');
+                return;
+            }
+            if (newPass.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+            
+            alert('Password changed successfully!');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+
+        function deactivateAccount() {
+            if (confirm('⚠️ Are you sure you want to deactivate your account?\n\nYour data will be removed after 30 days. This action cannot be undone.')) {
+                alert('Account deactivated. You will be redirected to the homepage.');
+                window.location.href = 'index.html';
+            }
+        }
+
+        function changeAvatar() {
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.querySelector('.avatar-image').style.background = `linear-gradient(135deg, ${randomColor}, ${randomColor}cc)`;
+            alert('Avatar color changed!');
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            const tabs = ['profile', 'stats', 'history', 'addresses', 'preferences', 'security'];
+            tabs.forEach(tab => {
+                const element = document.getElementById(`${tab}Tab`);
+                if (element) element.style.display = 'none';
+            });
+            document.getElementById(`${tabName}Tab`).style.display = 'block';
+            
+            // Update active tab styling
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Refresh content when switching tabs
+            if (tabName === 'stats') updateStatsTab();
+            if (tabName === 'history') updateRepairHistory();
+            if (tabName === 'addresses') updateAddresses();
+        }
+
+        // Load saved addresses from localStorage
+        const savedAddresses = localStorage.getItem('userAddresses');
+        if (savedAddresses) {
+            addresses = JSON.parse(savedAddresses);
+        }
+
+        // Initialize
+        loadUserData();
+        updateStatsTab();
+        updateRepairHistory();
+        updateAddresses();
+
+        // Make functions global
+        window.showTab = showTab;
+        window.saveProfile = saveProfile;
+        window.resetProfile = resetProfile;
+        window.changeAvatar = changeAvatar;
+        window.addNewAddress = addNewAddress;
+        window.editAddress = editAddress;
+        window.deleteAddress = deleteAddress;
+        window.setDefaultAddress = setDefaultAddress;
+        window.togglePreference = togglePreference;
+        window.changePassword = changePassword;
+        window.deactivateAccount = deactivateAccount;
+    </script>
+</body>
+</html>

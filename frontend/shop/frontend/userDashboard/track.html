@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO | Track Your Repair - Real Time Status</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.2rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 0 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59,130,246,0.3);
+        }
+
+        /* Tracking Content */
+        .tracking-content {
+            display: none;
+        }
+
+        .tracking-content.active {
+            display: block;
+        }
+
+        /* Status Cards */
+        .status-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .status-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+        }
+
+        .status-icon.pending { background: #fef3c7; color: #d97706; }
+        .status-icon.in-progress { background: #dbeafe; color: #3b82f6; }
+        .status-icon.completed { background: #d1fae5; color: #10b981; }
+
+        .status-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .status-label {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        /* Main Tracking Card */
+        .tracking-card {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .tracking-header {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            padding: 2rem;
+            color: white;
+        }
+
+        .repair-id {
+            font-size: 1.2rem;
+            font-family: monospace;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+            margin-bottom: 1rem;
+        }
+
+        .device-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .device-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .status-badge.pending { background: #f59e0b; color: white; }
+        .status-badge.in-progress { background: #3b82f6; color: white; }
+        .status-badge.completed { background: #10b981; color: white; }
+
+        /* Progress Timeline */
+        .progress-section {
+            padding: 2rem;
+        }
+
+        .timeline {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .timeline-step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .timeline-dot {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.8rem;
+            font-size: 1.3rem;
+            transition: all 0.3s;
+        }
+
+        .timeline-step.completed .timeline-dot {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        .timeline-step.active .timeline-dot {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            box-shadow: 0 0 0 5px rgba(59,130,246,0.2);
+        }
+
+        .timeline-step.pending .timeline-dot {
+            background: white;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-date {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            margin: 2rem 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .detail-icon {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #3b82f6;
+        }
+
+        .detail-info h4 {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 0.2rem;
+        }
+
+        .detail-info p {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        /* Location Map */
+        .location-section {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .location-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .map-placeholder {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            border-radius: 16px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-overlay {
+            text-align: center;
+            z-index: 2;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-outline:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        /* Not Found */
+        .not-found {
+            background: white;
+            border-radius: 28px;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .not-found i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        /* Recent Repairs */
+        .recent-repairs {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .recent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .recent-item:hover {
+            background: #f8fafc;
+        }
+
+        @media (max-width: 768px) {
+            .timeline {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .timeline::before {
+                display: none;
+            }
+            .timeline-step {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                text-align: left;
+            }
+            .timeline-dot {
+                margin: 0;
+            }
+            .device-name {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#" onclick="history.back()" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+            <h1><i class="fas fa-map-marker-alt"></i> Track Your Repair</h1>
+            <p>Enter your Repair ID to get real-time status updates</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="repairIdInput" class="search-input" placeholder="Enter Repair ID (e.g., RPT001, RPT002)" autocomplete="off">
+                <button class="search-btn" onclick="trackRepair()"><i class="fas fa-search"></i> Track Now</button>
+            </div>
+        </div>
+
+        <!-- Tracking Content -->
+        <div id="trackingContent" class="tracking-content"></div>
+    </div>
+
+    <script>
+        // Sample Repair Database
+        const repairsDatabase = {
+            'RPT001': {
+                id: 'RPT001',
+                device: 'iPhone 14 Pro',
+                brand: 'Apple',
+                issue: 'Screen cracked, display flickering, touch not working',
+                status: 'in-progress',
+                progress: 60,
+                technician: 'Rajesh Kumar',
+                technicianPhone: '+91 98765 43210',
+                technicianRating: 4.8,
+                estimatedCompletion: '2024-01-18',
+                submittedDate: '2024-01-15',
+                completedDate: null,
+                cost: 4500,
+                paymentStatus: 'pending',
+                address: 'No.45, 2nd Avenue, Anna Nagar, Chennai - 600040',
+                storeLocation: 'REPTO Anna Nagar',
+                storeAddress: 'No.45, 2nd Avenue, Anna Nagar, Chennai - 600040',
+                storePhone: '+91 44 1234 5678',
+                timeline: [
+                    { stage: 'Booking Received', date: '2024-01-15 10:30 AM', completed: true },
+                    { stage: 'Device Diagnosis', date: '2024-01-16 09:15 AM', completed: true },
+                    { stage: 'Repair in Progress', date: '2024-01-17 11:00 AM', completed: true },
+                    { stage: 'Quality Check', date: '2024-01-18 09:00 AM', completed: false },
+                    { stage: 'Ready for Pickup', date: '2024-01-18 04:00 PM', completed: false }
+                ]
+            },
+            'RPT002': {
+                id: 'RPT002',
+                device: 'MacBook Pro',
+                brand: 'Apple',
+                issue: 'Battery not charging, drains quickly, overheating',
+                status: 'pending',
+                progress: 25,
+                technician: 'Assigning',
+                technicianPhone: 'Will be assigned soon',
+                technicianRating: null,
+                estimatedCompletion: '2024-01-20',
+                submittedDate: '2024-01-16',
+                completedDate: null,
+                cost: 8500,
+                paymentStatus: 'pending',
+                address: 'Tower B, DLF IT Park, Porur, Chennai - 600116',
+                storeLocation: 'REPTO Porur',
+                storeAddress: 'Mount Poonamallee Road, Porur, Chennai - 600116',
+                storePhone: '+91 44 3456 7890',
+                timeline: [
+                    { stage: 'Booking Received', date: '2024-01-16 02:30 PM', completed: true },
+                    { stage: 'Device Diagnosis', date: 'Scheduled for 2024-01-18', completed: false },
+                    { stage: 'Repair in Progress', date: 'Pending', completed: false },
+                    { stage: 'Quality Check', date: 'Pending', completed: false },
+                    { stage: 'Ready for Pickup', date: 'Pending', completed: false }
+                ]
+            },
+            'RPT003': {
+                id: 'RPT003',
+                device: 'Samsung TV',
+                brand: 'Samsung',
+                issue: 'No power, won\'t turn on, black screen',
+                status: 'completed',
+                progress: 100,
+                technician: 'Amit Sharma',
+                technicianPhone: '+91 98765 43211',
+                technicianRating: 4.9,
+                estimatedCompletion: '2024-01-12',
+                submittedDate: '2024-01-10',
+                completedDate: '2024-01-12 03:45 PM',
+                cost: 3500,
+                paymentStatus: 'paid',
+                address: 'Velachery, Chennai - 600042',
+                storeLocation: 'REPTO Velachery',
+                storeAddress: 'Plot No.8, 100 Feet Road, Velachery, Chennai - 600042',
+                storePhone: '+91 44 9876 5432',
+                timeline: [
+                    { stage: 'Booking Received', date: '2024-01-10 09:15 AM', completed: true },
+                    { stage: 'Device Diagnosis', date: '2024-01-10 02:30 PM', completed: true },
+                    { stage: 'Repair in Progress', date: '2024-01-11 10:00 AM', completed: true },
+                    { stage: 'Quality Check', date: '2024-01-12 11:00 AM', completed: true },
+                    { stage: 'Ready for Pickup', date: '2024-01-12 03:45 PM', completed: true }
+                ]
+            }
+        };
+
+        // Recent searches
+        let recentSearches = JSON.parse(localStorage.getItem('recentRepairSearches')) || [];
+
+        function trackRepair() {
+            const repairId = document.getElementById('repairIdInput').value.trim().toUpperCase();
+            if (!repairId) {
+                alert('Please enter a Repair ID');
+                return;
+            }
+
+            const repair = repairsDatabase[repairId];
+            const trackingContent = document.getElementById('trackingContent');
+
+            if (!repair) {
+                trackingContent.innerHTML = `
+                    <div class="not-found">
+                        <i class="fas fa-search"></i>
+                        <h3>Repair Not Found</h3>
+                        <p>No repair request found with ID: ${repairId}</p>
+                        <p style="margin-top: 1rem;">Please check the ID and try again.</p>
+                        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="document.getElementById('repairIdInput').focus()">Try Again</button>
+                    </div>
+                `;
+                trackingContent.classList.add('active');
+                return;
+            }
+
+            // Save to recent searches
+            if (!recentSearches.includes(repairId)) {
+                recentSearches.unshift(repairId);
+                recentSearches = recentSearches.slice(0, 5);
+                localStorage.setItem('recentRepairSearches', JSON.stringify(recentSearches));
+            }
+
+            renderTrackingContent(repair);
+            trackingContent.classList.add('active');
+        }
+
+        function renderTrackingContent(repair) {
+            const statusClass = repair.status;
+            const statusText = repair.status === 'in-progress' ? 'In Progress' : repair.status === 'pending' ? 'Pending' : 'Completed';
+            const progressPercent = repair.progress;
+
+            // Determine current timeline step
+            const timelineSteps = [
+                { stage: 'Booking Received', icon: 'fa-calendar-check' },
+                { stage: 'Device Diagnosis', icon: 'fa-stethoscope' },
+                { stage: 'Repair in Progress', icon: 'fa-tools' },
+                { stage: 'Quality Check', icon: 'fa-clipboard-list' },
+                { stage: 'Ready for Pickup', icon: 'fa-box-open' }
+            ];
+
+            let currentStepIndex = 0;
+            for (let i = 0; i < repair.timeline.length; i++) {
+                if (repair.timeline[i].completed) {
+                    currentStepIndex = i;
+                } else {
+                    break;
+                }
+            }
+
+            const trackingContent = document.getElementById('trackingContent');
+            trackingContent.innerHTML = `
+                <div class="tracking-card">
+                    <div class="tracking-header">
+                        <div class="repair-id">
+                            <i class="fas fa-qrcode"></i> ${repair.id}
+                        </div>
+                        <div class="device-info">
+                            <div class="device-name">
+                                <i class="fas fa-${repair.device.includes('iPhone') ? 'mobile-alt' : repair.device.includes('Mac') ? 'laptop' : 'tv'}"></i>
+                                ${repair.device} ${repair.brand ? `(${repair.brand})` : ''}
+                            </div>
+                            <div class="status-badge ${statusClass}">
+                                <i class="fas ${repair.status === 'in-progress' ? 'fa-spinner fa-pulse' : repair.status === 'pending' ? 'fa-clock' : 'fa-check-circle'}"></i>
+                                ${statusText}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <!-- Progress Timeline -->
+                        <div class="timeline">
+                            ${timelineSteps.map((step, idx) => `
+                                <div class="timeline-step ${idx <= currentStepIndex ? (idx < currentStepIndex ? 'completed' : 'active') : 'pending'}">
+                                    <div class="timeline-dot">
+                                        <i class="fas ${step.icon}"></i>
+                                    </div>
+                                    <div class="timeline-title">${step.stage}</div>
+                                    <div class="timeline-date">${repair.timeline[idx]?.date || 'Pending'}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-wrapper">
+                            <div class="progress-label">
+                                <span>Overall Progress</span>
+                                <span>${progressPercent}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <div class="detail-icon"><i class="fas fa-wrench"></i></div>
+                                <div class="detail-info">
+                                    <h4>Issue Description</h4>
+                                    <p>${repair.issue}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon"><i class="fas fa-user-cog"></i></div>
+                                <div class="detail-info">
+                                    <h4>Technician Assigned</h4>
+                                    <p>${repair.technician}</p>
+                                    ${repair.technicianRating ? `<p style="font-size:0.7rem; color:#f59e0b;"><i class="fas fa-star"></i> ${repair.technicianRating} / 5.0</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon"><i class="fas fa-calendar"></i></div>
+                                <div class="detail-info">
+                                    <h4>Estimated Completion</h4>
+                                    <p>${repair.estimatedCompletion}</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-icon"><i class="fas fa-rupee-sign"></i></div>
+                                <div class="detail-info">
+                                    <h4>Repair Cost</h4>
+                                    <p>₹${repair.cost.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Section -->
+                        <div class="location-section">
+                            <div class="location-header">
+                                <i class="fas fa-store" style="color: #3b82f6;"></i>
+                                <h3>Store Location</h3>
+                            </div>
+                            <div class="map-placeholder" id="mapPlaceholder">
+                                <div class="map-overlay">
+                                    <i class="fas fa-map-marker-alt" style="font-size: 3rem; color: #3b82f6;"></i>
+                                    <p><strong>${repair.storeLocation}</strong></p>
+                                    <p style="font-size: 0.85rem;">${repair.storeAddress}</p>
+                                    <p style="font-size: 0.8rem;"><i class="fas fa-phone"></i> ${repair.storePhone}</p>
+                                    <button class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.5rem 1rem;" onclick="getDirections('${repair.storeAddress}')">
+                                        <i class="fas fa-directions"></i> Get Directions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delivery/Pickup Address -->
+                        <div class="location-section">
+                            <div class="location-header">
+                                <i class="fas fa-truck" style="color: #10b981;"></i>
+                                <h3>${repair.status === 'completed' ? 'Delivery Address' : 'Pickup/Delivery Address'}</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <i class="fas fa-home" style="font-size: 1.5rem; color: #64748b;"></i>
+                                <div>
+                                    <p><strong>Service Address</strong></p>
+                                    <p>${repair.address}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="contactTechnician('${repair.technicianPhone}')">
+                            <i class="fas fa-phone-alt"></i> Contact Technician
+                        </button>
+                        <button class="btn btn-outline" onclick="shareStatus('${repair.id}')">
+                            <i class="fas fa-share-alt"></i> Share Status
+                        </button>
+                        ${repair.paymentStatus === 'pending' ? `<button class="btn btn-primary" onclick="makePayment('${repair.id}')">
+                            <i class="fas fa-credit-card"></i> Pay ₹${repair.cost}
+                        </button>` : ''}
+                        <button class="btn btn-outline" onclick="downloadReport('${repair.id}')">
+                            <i class="fas fa-download"></i> Download Report
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getDirections(address) {
+            window.open(`https://www.google.com/maps/search/${encodeURIComponent(address)}`, '_blank');
+        }
+
+        function contactTechnician(phone) {
+            if (phone && phone !== 'Will be assigned soon') {
+                window.location.href = `tel:${phone}`;
+            } else {
+                alert('Technician will be assigned shortly. You will receive an SMS with contact details.');
+            }
+        }
+
+        function shareStatus(repairId) {
+            const repair = repairsDatabase[repairId];
+            if (repair) {
+                const shareText = `My repair ${repair.id} (${repair.device}) is ${repair.status === 'in-progress' ? 'in progress' : repair.status} at REPTO. Progress: ${repair.progress}%. Track at: repto.com/track`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Repair Status',
+                        text: shareText,
+                        url: window.location.href
+                    });
+                } else {
+                    alert('Copy this link to share:\n' + shareText);
+                }
+            }
+        }
+
+        function makePayment(repairId) {
+            const repair = repairsDatabase[repairId];
+            if (repair) {
+                alert(`💳 Payment Gateway\n\nRepair ID: ${repair.id}\nAmount: ₹${repair.cost}\n\nThis would redirect to payment page.\n\nDemo: Payment successful!`);
+                repair.paymentStatus = 'paid';
+                renderTrackingContent(repair);
+            }
+        }
+
+        function downloadReport(repairId) {
+            const repair = repairsDatabase[repairId];
+            if (repair) {
+                const report = `
+                    REPTO Repair Report
+                    ====================
+                    Repair ID: ${repair.id}
+                    Device: ${repair.device}
+                    Issue: ${repair.issue}
+                    Status: ${repair.status}
+                    Progress: ${repair.progress}%
+                    Technician: ${repair.technician}
+                    Estimated Completion: ${repair.estimatedCompletion}
+                    Cost: ₹${repair.cost}
+                    Payment: ${repair.paymentStatus}
+                    Store: ${repair.storeLocation}
+                    Address: ${repair.address}
+                `;
+                const blob = new Blob([report], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `repair_${repair.id}_report.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Auto-track from URL parameter
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Load recent repairs in sidebar (optional)
+        function showRecentRepairs() {
+            const trackingContent = document.getElementById('trackingContent');
+            if (recentSearches.length > 0 && !trackingContent.classList.contains('active')) {
+                const recentHtml = `
+                    <div class="recent-repairs">
+                        <h3 style="margin-bottom: 1rem;"><i class="fas fa-history"></i> Recent Repairs</h3>
+                        ${recentSearches.map(id => `
+                            <div class="recent-item" onclick="document.getElementById('repairIdInput').value='${id}'; trackRepair()">
+                                <div>
+                                    <strong>${id}</strong>
+                                    <p style="font-size: 0.8rem; color: #64748b;">${repairsDatabase[id]?.device || 'Unknown device'}</p>
+                                </div>
+                                <i class="fas fa-chevron-right" style="color: #cbd5e1;"></i>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                trackingContent.innerHTML = recentHtml;
+                trackingContent.classList.add('active');
+            }
+        }
+
+        // Enter key support
+        document.getElementById('repairIdInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                trackRepair();
+            }
+        });
+
+        // Initialize
+        const repairId = getUrlParameter('id');
+        if (repairId) {
+            document.getElementById('repairIdInput').value = repairId;
+            trackRepair();
+        } else {
+            showRecentRepairs();
+        }
+    </script>
+</body>
+</html>

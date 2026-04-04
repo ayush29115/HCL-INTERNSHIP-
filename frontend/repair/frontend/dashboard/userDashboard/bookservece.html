@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO | Book Repair Service with Media Upload</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Form Container */
+        .form-container {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        label .required {
+            color: #ef4444;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        /* Media Upload Section */
+        .media-section {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .media-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: #f1f5f9;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #3b82f6;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .upload-area .small-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Media Preview */
+        .media-preview {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f1f5f9;
+            aspect-ratio: 1;
+        }
+
+        .preview-item img, .preview-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item video {
+            background: #000;
+        }
+
+        .remove-media {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .remove-media:hover {
+            background: #ef4444;
+        }
+
+        .media-type-badge {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+        }
+
+        /* Service Mode Toggle */
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .mode-option {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-option i {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .mode-option.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .address-field {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .address-field.active {
+            display: block;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59,130,246,0.4);
+        }
+
+        /* Success Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            max-width: 450px;
+            width: 90%;
+            padding: 2rem;
+            text-align: center;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-icon {
+            width: 70px;
+            height: 70px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .modal-icon i {
+            font-size: 2rem;
+            color: #10b981;
+        }
+
+        .modal-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-content p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 1.5rem;
+            }
+            .mode-toggle {
+                flex-direction: column;
+            }
+            .media-preview {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#" onclick="goBack()" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            <h1><i class="fas fa-tools"></i> Book Repair Service</h1>
+            <p>Upload photos/videos of the issue for faster diagnosis</p>
+        </div>
+
+        <div class="form-container">
+            <div class="form-title">Repair Request Form</div>
+            
+            <form id="bookingForm">
+                <!-- Device Information -->
+                <div class="form-group">
+                    <label>Device Type <span class="required">*</span></label>
+                    <select id="deviceType" required>
+                        <option value="">Select Device</option>
+                        <option value="smartphone">Smartphone / iPhone</option>
+                        <option value="laptop">Laptop / MacBook</option>
+                        <option value="tablet">Tablet / iPad</option>
+                        <option value="tv">Television</option>
+                        <option value="smartwatch">Smartwatch</option>
+                        <option value="console">Gaming Console</option>
+                        <option value="other">Other Electronics</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Brand & Model</label>
+                    <input type="text" id="brandModel" placeholder="e.g., iPhone 14 Pro, Dell XPS 15">
+                </div>
+
+                <div class="form-group">
+                    <label>Problem Description <span class="required">*</span></label>
+                    <textarea id="issue" rows="3" placeholder="Describe the issue in detail..." required></textarea>
+                </div>
+
+                <!-- Media Upload Section -->
+                <div class="media-section">
+                    <h3><i class="fas fa-camera"></i> Upload Photos / Videos</h3>
+                    <div class="upload-area" onclick="document.getElementById('mediaInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload photos or videos</p>
+                        <p class="small-text">Supported: JPG, PNG, GIF, MP4, MOV (Max 10MB each)</p>
+                    </div>
+                    <input type="file" id="mediaInput" class="file-input" accept="image/*,video/*" multiple>
+                    <div id="mediaPreview" class="media-preview"></div>
+                    <p class="small-text" style="margin-top: 0.5rem; text-align: center;">
+                        <i class="fas fa-info-circle"></i> Upload clear photos of the issue for faster service
+                    </p>
+                </div>
+
+                <!-- Service Mode -->
+                <div class="form-group">
+                    <label>Service Mode <span class="required">*</span></label>
+                    <div class="mode-toggle">
+                        <div class="mode-option" data-mode="store">
+                            <i class="fas fa-store"></i> Visit Store
+                        </div>
+                        <div class="mode-option" data-mode="pickup">
+                            <i class="fas fa-truck"></i> Free Pick-up & Drop
+                        </div>
+                    </div>
+                    <div id="addressField" class="address-field">
+                        <label>Pick-up Address <span class="required">*</span></label>
+                        <textarea id="address" rows="2" placeholder="Enter your full address with landmark"></textarea>
+                    </div>
+                </div>
+
+                <!-- Preferred Date & Time -->
+                <div class="form-group">
+                    <label>Preferred Date</label>
+                    <input type="date" id="preferredDate">
+                </div>
+
+                <div class="form-group">
+                    <label>Preferred Time Slot</label>
+                    <select id="timeSlot">
+                        <option value="">Select time slot</option>
+                        <option value="9-11">9:00 AM - 11:00 AM</option>
+                        <option value="11-1">11:00 AM - 1:00 PM</option>
+                        <option value="1-3">1:00 PM - 3:00 PM</option>
+                        <option value="3-5">3:00 PM - 5:00 PM</option>
+                        <option value="5-7">5:00 PM - 7:00 PM</option>
+                        <option value="7-9">7:00 PM - 9:00 PM</option>
+                    </select>
+                </div>
+
+                <!-- Customer Information -->
+                <div class="form-group">
+                    <label>Your Name <span class="required">*</span></label>
+                    <input type="text" id="customerName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <input type="tel" id="phone" required placeholder="10-digit mobile number">
+                </div>
+
+                <div class="form-group">
+                    <label>Email (for updates)</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Submit Repair Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Booking Confirmed!</h3>
+            <p id="modalMessage">Your repair request has been submitted successfully.</p>
+            <button class="modal-btn" onclick="closeModalAndRedirect()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Media storage
+        let mediaFiles = [];
+        
+        // Handle media upload
+        const mediaInput = document.getElementById('mediaInput');
+        const mediaPreview = document.getElementById('mediaPreview');
+        
+        mediaInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            files.forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`File ${file.name} exceeds 10MB limit`);
+                    return;
+                }
+                
+                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                    mediaFiles.push(file);
+                    previewMedia(file);
+                } else {
+                    alert(`File ${file.name} is not a supported format`);
+                }
+            });
+        });
+        
+        function previewMedia(file) {
+            const reader = new FileReader();
+            const previewId = `preview_${Date.now()}_${Math.random()}`;
+            
+            reader.onload = function(e) {
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'preview-item';
+                previewDiv.id = previewId;
+                
+                if (file.type.startsWith('image/')) {
+                    previewDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <button class="remove-media" onclick="removeMedia('${previewId}', '${file.name}')"><i class="fas fa-times"></i></button>
+                        <span class="media-type-badge"><i class="fas fa-image"></i> Photo</span>
+                    `;
+                } else if (file.type.startsWith('video/')) {
+                    previewDiv.innerHTML = `
+                        <video src="${e.target.result}" controls></video>
+                        <button class="remove-media" onclick="removeMedia('${previewId}', '${file.name}')"><i class="fas fa-times"></i></button>
+                        <span class="media-type-badge"><i class="fas fa-video"></i> Video</span>
+                    `;
+                }
+                
+                mediaPreview.appendChild(previewDiv);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        function removeMedia(previewId, fileName) {
+            const index = mediaFiles.findIndex(f => f.name === fileName);
+            if (index !== -1) {
+                mediaFiles.splice(index, 1);
+            }
+            const previewElement = document.getElementById(previewId);
+            if (previewElement) {
+                previewElement.remove();
+            }
+        }
+        
+        // Service mode toggle
+        let selectedMode = 'store';
+        const modeOptions = document.querySelectorAll('.mode-option');
+        const addressField = document.getElementById('addressField');
+        
+        modeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                modeOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedMode = option.dataset.mode;
+                
+                if (selectedMode === 'pickup') {
+                    addressField.classList.add('active');
+                } else {
+                    addressField.classList.remove('active');
+                }
+            });
+        });
+        
+        // Set default selected mode
+        document.querySelector('.mode-option[data-mode="store"]').classList.add('selected');
+        
+        // Set minimum date for preferred date (today)
+        const dateInput = document.getElementById('preferredDate');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+        
+        // Handle form submission
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate required fields
+            const deviceType = document.getElementById('deviceType').value;
+            const issue = document.getElementById('issue').value;
+            const customerName = document.getElementById('customerName').value;
+            const phone = document.getElementById('phone').value;
+            
+            if (!deviceType || !issue || !customerName || !phone) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            if (phone.length !== 10 || isNaN(phone)) {
+                alert('Please enter a valid 10-digit phone number');
+                return;
+            }
+            
+            if (selectedMode === 'pickup') {
+                const address = document.getElementById('address').value;
+                if (!address) {
+                    alert('Please enter your pick-up address');
+                    return;
+                }
+            }
+            
+            // Collect all form data
+            const bookingData = {
+                id: 'RPT' + Date.now(),
+                deviceType: deviceType,
+                brandModel: document.getElementById('brandModel').value,
+                issue: issue,
+                mediaCount: mediaFiles.length,
+                serviceMode: selectedMode,
+                address: selectedMode === 'pickup' ? document.getElementById('address').value : 'Store Visit',
+                preferredDate: document.getElementById('preferredDate').value || 'As soon as possible',
+                timeSlot: document.getElementById('timeSlot').value || 'Flexible',
+                customerName: customerName,
+                phone: phone,
+                email: document.getElementById('email').value,
+                status: 'pending',
+                submittedAt: new Date().toLocaleString()
+            };
+            
+            // Save to localStorage
+            let bookings = JSON.parse(localStorage.getItem('repairBookings')) || [];
+            bookings.unshift(bookingData);
+            localStorage.setItem('repairBookings', JSON.stringify(bookings));
+            
+            // Also save user profile
+            localStorage.setItem('userProfile', JSON.stringify({
+                name: customerName,
+                phone: phone,
+                email: document.getElementById('email').value
+            }));
+            
+            // Show success modal with media info
+            const modalMessage = document.getElementById('modalMessage');
+            let message = `Your repair request (${bookingData.id}) has been submitted successfully!\n\n`;
+            message += `We will contact you within 1 hour to confirm the slot.`;
+            if (mediaFiles.length > 0) {
+                message += `\n\n📎 ${mediaFiles.length} media file(s) attached for reference.`;
+            }
+            modalMessage.innerHTML = message.replace(/\n/g, '<br>');
+            
+            document.getElementById('successModal').classList.add('active');
+            
+            // Reset form
+            this.reset();
+            mediaFiles = [];
+            mediaPreview.innerHTML = '';
+            document.querySelector('.mode-option[data-mode="store"]').classList.add('selected');
+            document.querySelector('.mode-option[data-mode="pickup"]').classList.remove('selected');
+            addressField.classList.remove('active');
+        });
+        
+        function closeModalAndRedirect() {
+            document.getElementById('successModal').classList.remove('active');
+            window.location.href = 'repair.html';
+        }
+        
+        function goBack() {
+            window.location.href = 'repair.html';
+        }
+        
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#3b82f6';
+            uploadArea.style.background = '#f1f5f9';
+        });
+        
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#cbd5e1';
+            uploadArea.style.background = 'white';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#cbd5e1';
+            uploadArea.style.background = 'white';
+            
+            const files = Array.from(e.dataTransfer.files);
+            files.forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`File ${file.name} exceeds 10MB limit`);
+                    return;
+                }
+                
+                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                    mediaFiles.push(file);
+                    previewMedia(file);
+                } else {
+                    alert(`File ${file.name} is not a supported format`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

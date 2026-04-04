@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPTO · my orders · real tracking</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f4f7fc;
+            color: #1e293b;
+        }
+
+        .orders-page {
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 0 32px;
+        }
+
+        /* header */
+        .orders-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .orders-header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(145deg, #0b1e42, #1e3a6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-link {
+            background: white;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #0b1e42;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+            border: 1px solid #dee9f5;
+            transition: 0.2s;
+        }
+
+        .back-link:hover {
+            border-color: #ff9900;
+            transform: translateX(-4px);
+        }
+
+        /* filter tabs */
+        .order-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: white;
+            border: 1px solid #dee9f5;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #4f658d;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #ff9900;
+            color: #0b1e42;
+            border-color: #ff9900;
+        }
+
+        /* orders container */
+        .orders-container {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* order card */
+        .order-card {
+            background: white;
+            border-radius: 32px;
+            border: 1px solid #ecf3fe;
+            box-shadow: 0 18px 40px -14px rgba(0,10,30,0.1);
+            overflow: hidden;
+            transition: 0.2s;
+        }
+
+        .order-card:hover {
+            border-color: #ff9900;
+        }
+
+        .order-header {
+            background: #f8fafd;
+            padding: 20px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ecf3fe;
+        }
+
+        .order-id {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #0b1e42;
+        }
+
+        .order-date {
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .order-status {
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .status-delivered { background: #e2f0e8; color: #1f7840; }
+        .status-shipped { background: #e0ecfe; color: #1960b3; }
+        .status-processing { background: #fff2d9; color: #b45b0a; }
+        .status-cancelled { background: #ffe6e6; color: #b32626; }
+
+        /* tracking section - REAL DATA */
+        .tracking-section {
+            padding: 28px;
+            background: linear-gradient(145deg, #ffffff, #fafcff);
+        }
+
+        .tracking-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0b1e42;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tracking-timeline {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        .timeline-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .timeline-step .step-icon {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border: 2px solid #d4e0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: #8a9bb8;
+            font-size: 1.3rem;
+            transition: 0.2s;
+        }
+
+        .timeline-step.completed .step-icon {
+            background: #ff9900;
+            border-color: #ff9900;
+            color: white;
+        }
+
+        .timeline-step.active .step-icon {
+            border-color: #ff9900;
+            color: #ff9900;
+            background: #fff9f0;
+        }
+
+        .timeline-step .step-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        .timeline-step .step-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            top: 24px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #d4e0f0;
+            z-index: 1;
+        }
+
+        .timeline-progress-fill {
+            height: 2px;
+            background: #ff9900;
+            transition: width 0.3s;
+        }
+
+        /* tracking details grid */
+        .tracking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: #f8fafd;
+            border-radius: 28px;
+            padding: 24px;
+            margin-top: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .detail-item i {
+            font-size: 1.4rem;
+            color: #ff9900;
+            width: 36px;
+        }
+
+        .detail-item div p:first-child {
+            font-weight: 600;
+            color: #0b1e42;
+        }
+
+        .detail-item div p:last-child {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* products in order */
+        .order-products {
+            padding: 20px 28px;
+            border-top: 1px solid #ecf3fe;
+        }
+
+        .product-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 0;
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #dbe6f2;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-weight: 700;
+            color: #0b1e42;
+        }
+
+        .product-meta {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .product-price {
+            font-weight: 700;
+            color: #ff9900;
+        }
+
+        /* toast */
+        .toast-message {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #0b1e42; color: white; padding: 16px 40px;
+            border-radius: 60px; z-index: 3000; animation: fadeInOut 2.2s forwards;
+            font-weight: 500; box-shadow: 0 20px 40px rgba(255,153,0,0.3);
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+        }
+
+        /* hidden class */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="orders-page">
+        <!-- header -->
+        <div class="orders-header">
+            <h1><i class="fas fa-truck" style="color:#ff9900;"></i> my orders · real tracking</h1>
+            <a href="#" class="back-link" onclick="showToast('← back to dashboard'); return false;"><i class="fas fa-arrow-left"></i> dashboard</a>
+        </div>
+
+        <!-- filter tabs -->
+        <div class="order-tabs">
+            <div class="tab-btn active" onclick="filterOrders('all')">all orders</div>
+            <div class="tab-btn" onclick="filterOrders('processing')">processing</div>
+            <div class="tab-btn" onclick="filterOrders('shipped')">shipped</div>
+            <div class="tab-btn" onclick="filterOrders('delivered')">delivered</div>
+            <div class="tab-btn" onclick="filterOrders('cancelled')">cancelled</div>
+        </div>
+
+        <!-- orders container (dynamic) -->
+        <div class="orders-container" id="ordersContainer">
+            <!-- filled by js -->
+        </div>
+    </div>
+
+    <script>
+        // ---------- REAL ORDER DATA WITH TRACKING ----------
+        const ordersData = [
+            {
+                id: 'RE-10248',
+                date: '2026-03-18',
+                status: 'shipped',
+                tracking: {
+                    current: 'shipped',
+                    steps: [
+                        { label: 'order placed', time: '18 Mar, 10:23', completed: true },
+                        { label: 'confirmed', time: '18 Mar, 11:45', completed: true },
+                        { label: 'shipped', time: '19 Mar, 08:12', completed: true },
+                        { label: 'out for delivery', time: 'expected 20 Mar', completed: false },
+                        { label: 'delivered', time: 'pending', completed: false }
+                    ],
+                    carrier: 'BlueDart',
+                    trackingNumber: 'BD389201234IN',
+                    estimated: '20 Mar 2026',
+                    currentLocation: 'Mumbai hub'
+                },
+                items: [
+                    { name: 'iPhone 15 Pro', qty: 1, price: 129999, img: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=200' },
+                    { name: 'AirPods Pro 2', qty: 1, price: 24999, img: 'https://images.unsplash.com/photo-1603351154351-5e2d1db810f1?w=200' }
+                ],
+                total: 154998
+            },
+            {
+                id: 'RE-10235',
+                date: '2026-03-15',
+                status: 'delivered',
+                tracking: {
+                    current: 'delivered',
+                    steps: [
+                        { label: 'order placed', time: '15 Mar, 14:05', completed: true },
+                        { label: 'confirmed', time: '15 Mar, 15:20', completed: true },
+                        { label: 'shipped', time: '16 Mar, 09:30', completed: true },
+                        { label: 'out for delivery', time: '17 Mar, 08:00', completed: true },
+                        { label: 'delivered', time: '17 Mar, 14:22', completed: true }
+                    ],
+                    carrier: 'Delhivery',
+                    trackingNumber: 'DLV5678123IN',
+                    deliveredDate: '17 Mar 2026, 14:22'
+                },
+                items: [
+                    { name: 'Sony WH-1000XM5', qty: 1, price: 29999, img: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=200' }
+                ],
+                total: 29999
+            },
+            {
+                id: 'RE-10236',
+                date: '2026-03-10',
+                status: 'delivered',
+                tracking: {
+                    current: 'delivered',
+                    steps: [
+                        { label: 'order placed', time: '10 Mar, 09:12', completed: true },
+                        { label: 'confirmed', time: '10 Mar, 10:30', completed: true },
+                        { label: 'shipped', time: '11 Mar, 11:20', completed: true },
+                        { label: 'out for delivery', time: '12 Mar, 08:15', completed: true },
+                        { label: 'delivered', time: '12 Mar, 16:40', completed: true }
+                    ],
+                    carrier: 'FedEx',
+                    trackingNumber: 'FX987654321IN',
+                    deliveredDate: '12 Mar 2026'
+                },
+                items: [
+                    { name: 'MacBook Pro 16', qty: 1, price: 219999, img: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200' }
+                ],
+                total: 219999
+            },
+            {
+                id: 'RE-10249',
+                date: '2026-03-19',
+                status: 'processing',
+                tracking: {
+                    current: 'confirmed',
+                    steps: [
+                        { label: 'order placed', time: '19 Mar, 08:30', completed: true },
+                        { label: 'confirmed', time: '19 Mar, 09:45', completed: true },
+                        { label: 'shipped', time: 'expected 20 Mar', completed: false },
+                        { label: 'out for delivery', time: 'pending', completed: false },
+                        { label: 'delivered', time: 'pending', completed: false }
+                    ],
+                    carrier: 'Amazon Shipping',
+                    trackingNumber: 'AZ789012345IN',
+                    estimated: '21 Mar 2026'
+                },
+                items: [
+                    { name: 'DJI Mavic 3 Pro', qty: 1, price: 159999, img: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=200' },
+                    { name: 'GoPro Hero 12', qty: 1, price: 35999, img: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=200' }
+                ],
+                total: 195998
+            },
+            {
+                id: 'RE-10242',
+                date: '2026-03-05',
+                status: 'cancelled',
+                tracking: {
+                    current: 'cancelled',
+                    steps: [
+                        { label: 'order placed', time: '5 Mar, 19:20', completed: true },
+                        { label: 'confirmed', time: '5 Mar, 20:15', completed: true },
+                        { label: 'cancelled', time: '6 Mar, 09:00', completed: true }
+                    ],
+                    reason: 'cancelled by customer'
+                },
+                items: [
+                    { name: 'Samsung S24 Ultra', qty: 1, price: 119999, img: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=200' }
+                ],
+                total: 119999
+            }
+        ];
+
+        // render orders based on filter
+        function renderOrders(filter = 'all') {
+            const container = document.getElementById('ordersContainer');
+            if (!container) return;
+
+            const filtered = filter === 'all' ? ordersData : ordersData.filter(o => o.status === filter);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:60px; background:white; border-radius:48px;"><i class="fas fa-box-open" style="font-size:4rem; color:#cbd5e1;"></i><p style="margin-top:20px; font-size:1.2rem;">no orders found</p></div>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(order => {
+                const statusClass = `status-${order.status}`;
+                const formattedDate = new Date(order.date).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+                
+                // build tracking timeline
+                let timelineSteps = '';
+                const steps = order.tracking.steps || [];
+                const completedCount = steps.filter(s => s.completed).length;
+                const progressPercent = (completedCount / steps.length) * 100;
+
+                steps.forEach((step, idx) => {
+                    let stepClass = '';
+                    if (step.completed) stepClass = 'completed';
+                    else if (idx === completedCount && order.status !== 'cancelled') stepClass = 'active';
+                    
+                    timelineSteps += `
+                        <div class="timeline-step ${stepClass}">
+                            <div class="step-icon"><i class="fas ${getStepIcon(step.label)}"></i></div>
+                            <div class="step-label">${step.label}</div>
+                            <div class="step-time">${step.time}</div>
+                        </div>
+                    `;
+                });
+
+                // tracking details
+                const trackingDetails = `
+                    <div class="tracking-details">
+                        <div class="detail-item"><i class="fas fa-truck"></i><div><p>carrier</p><p>${order.tracking.carrier || 'N/A'}</p></div></div>
+                        <div class="detail-item"><i class="fas fa-hashtag"></i><div><p>tracking #</p><p>${order.tracking.trackingNumber || 'N/A'}</p></div></div>
+                        <div class="detail-item"><i class="fas fa-calendar-alt"></i><div><p>${order.status === 'delivered' ? 'delivered' : 'estimated'}</p><p>${order.tracking.estimated || order.tracking.deliveredDate || 'N/A'}</p></div></div>
+                        ${order.tracking.currentLocation ? `<div class="detail-item"><i class="fas fa-map-marker-alt"></i><div><p>current location</p><p>${order.tracking.currentLocation}</p></div></div>` : ''}
+                    </div>
+                `;
+
+                // products list
+                let productsHtml = '';
+                order.items.forEach(item => {
+                    productsHtml += `
+                        <div class="product-row">
+                            <div class="product-img" style="background-image:url('${item.img}')"></div>
+                            <div class="product-info">
+                                <div class="product-name">${item.name}</div>
+                                <div class="product-meta">qty: ${item.qty}</div>
+                            </div>
+                            <div class="product-price">₹${item.price.toLocaleString()}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="order-card" data-status="${order.status}">
+                        <div class="order-header">
+                            <div class="order-id">${order.id}</div>
+                            <div class="order-date"><i class="far fa-calendar"></i> ${formattedDate}</div>
+                            <div class="order-status ${statusClass}">${order.status.toUpperCase()}</div>
+                        </div>
+                        
+                        <div class="tracking-section">
+                            <div class="tracking-title"><i class="fas fa-map-marked-alt" style="color:#ff9900;"></i> tracking updates</div>
+                            <div class="tracking-timeline">
+                                ${timelineSteps}
+                                <div class="timeline-progress"><div class="timeline-progress-fill" style="width: ${progressPercent}%;"></div></div>
+                            </div>
+                            ${trackingDetails}
+                        </div>
+
+                        <div class="order-products">
+                            <div style="margin-bottom:12px; font-weight:600; color:#0b1e42;"><i class="fas fa-box"></i> items</div>
+                            ${productsHtml}
+                        </div>
+                        
+                        <div style="padding:0 28px 20px 28px; text-align:right; font-weight:800; border-top:1px solid #ecf3fe; padding-top:20px;">
+                            total: ₹${order.total.toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // helper for step icons
+        function getStepIcon(label) {
+            if (label.includes('placed')) return 'fa-shopping-cart';
+            if (label.includes('confirm')) return 'fa-check-circle';
+            if (label.includes('shipped')) return 'fa-truck';
+            if (label.includes('out for')) return 'fa-map-marker-alt';
+            if (label.includes('delivered')) return 'fa-home';
+            if (label.includes('cancelled')) return 'fa-times-circle';
+            return 'fa-circle';
+        }
+
+        // filter function
+        window.filterOrders = function(status) {
+            // update active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderOrders(status);
+            showToast(`showing ${status} orders`);
+        };
+
+        // toast
+        window.showToast = function(msg) {
+            const existing = document.querySelector('.toast-message');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2200);
+        };
+
+        // prevent link navigation
+        document.querySelectorAll('a[href="#"]').forEach(link => {
+            link.addEventListener('click', (e) => e.preventDefault());
+        });
+
+        // initial render
+        renderOrders('all');
+
+        // simulate real-time tracking update after 5 seconds (demo)
+        setTimeout(() => {
+            // update order RE-10248 to "out for delivery" to show dynamic tracking
+            const order = ordersData.find(o => o.id === 'RE-10248');
+            if (order) {
+                order.tracking.current = 'out-for-delivery';
+                order.tracking.steps[3].completed = true;
+                order.tracking.steps[3].time = '19 Mar, 09:30';
+                order.tracking.currentLocation = 'Andheri East hub';
+                order.status = 'shipped'; // keep as shipped but step updated
+                renderOrders('all');
+                showToast('🔄 live update: order RE-10248 is out for delivery');
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

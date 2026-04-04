@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO | Role Based Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 40px 32px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .logo-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        .form-section {
+            padding: 32px;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 60px;
+        }
+
+        .role-option {
+            flex: 1;
+            padding: 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+
+        .role-option.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .role-option.shop.active { color: #3b82f6; }
+        .role-option.repair.active { color: #f97316; }
+        .role-option.recycle.active { color: #10b981; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .demo-section {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .demo-title {
+            font-size: 11px;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .demo-grid {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .demo-card {
+            flex: 1;
+            padding: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .demo-card:hover {
+            background: white;
+            border-color: #10b981;
+            transform: translateY(-2px);
+        }
+
+        .demo-role {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .demo-email {
+            font-size: 9px;
+            color: #64748b;
+        }
+
+        .demo-role.shop { color: #3b82f6; }
+        .demo-role.repair { color: #f97316; }
+        .demo-role.recycle { color: #10b981; }
+
+        @media (max-width: 480px) {
+            .form-section {
+                padding: 24px;
+            }
+            .role-option span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <div class="logo-icon">
+                <i class="fas fa-recycle"></i>
+            </div>
+            <h1>REPTO</h1>
+            <p>Welcome Back!</p>
+            <p>Shop • Repair • Recycle</p>
+        </div>
+        
+        <div class="form-section">
+            <div class="role-selector" id="roleSelector">
+                <div class="role-option shop active" data-role="shop">
+                    <i class="fas fa-store"></i> Shop
+                </div>
+                <div class="role-option repair" data-role="repair">
+                    <i class="fas fa-tools"></i> Repair
+                </div>
+                <div class="role-option recycle" data-role="recycle">
+                    <i class="fas fa-recycle"></i> Recycle
+                </div>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="Enter your email" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Enter your password" autocomplete="off">
+                        <i class="fas fa-eye-slash password-toggle" id="togglePassword"></i>
+                    </div>
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <i class="fas fa-arrow-right"></i> Sign In
+                </button>
+                <div id="errorMessage" class="error-message"></div>
+            </form>
+            
+            <div class="demo-section">
+                <div class="demo-title">
+                    <i class="fas fa-flask"></i> Demo Accounts (Click to fill)
+                </div>
+                <div class="demo-grid">
+                    <div class="demo-card" data-email="admin@shop.com" data-password="shop123" data-role="shop">
+                        <div class="demo-role shop">🛒 Shop</div>
+                        <div class="demo-email">admin@shop.com</div>
+                    </div>
+                    <div class="demo-card" data-email="admin@repair.com" data-password="repair123" data-role="repair">
+                        <div class="demo-role repair">🔧 Repair</div>
+                        <div class="demo-email">admin@repair.com</div>
+                    </div>
+                    <div class="demo-card" data-email="admin@recycle.com" data-password="recycle123" data-role="recycle">
+                        <div class="demo-role recycle">♻️ Recycle</div>
+                        <div class="demo-email">admin@recycle.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const API_URL = "http://localhost:5000/api";
+
+let selectedRole = "shop";
+
+// ================= ROLE SELECT =================
+document.querySelectorAll(".role-option").forEach(opt => {
+  opt.addEventListener("click", () => {
+    document.querySelectorAll(".role-option").forEach(o => o.classList.remove("active"));
+    opt.classList.add("active");
+    selectedRole = opt.dataset.role;
+  });
+});
+
+// ================= PASSWORD TOGGLE =================
+const togglePassword = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+
+togglePassword.addEventListener("click", () => {
+  const type = passwordInput.type === "password" ? "text" : "password";
+  passwordInput.type = type;
+
+  togglePassword.classList.toggle("fa-eye");
+  togglePassword.classList.toggle("fa-eye-slash");
+});
+
+// ================= DEMO AUTO FILL =================
+document.querySelectorAll(".demo-card").forEach(card => {
+  card.addEventListener("click", () => {
+    document.getElementById("email").value = card.dataset.email;
+    document.getElementById("password").value = card.dataset.password;
+
+    // auto select role
+    selectedRole = card.dataset.role;
+    document.querySelectorAll(".role-option").forEach(o => o.classList.remove("active"));
+    document.querySelector(`.role-option.${selectedRole}`).classList.add("active");
+  });
+});
+
+// ================= ERROR HANDLER =================
+function showError(msg) {
+  const errorBox = document.getElementById("errorMessage");
+  errorBox.innerText = msg;
+  errorBox.style.display = "block";
+}
+
+function clearError() {
+  const errorBox = document.getElementById("errorMessage");
+  errorBox.style.display = "none";
+}
+
+// ================= LOGIN =================
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearError();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const btn = document.getElementById("loginBtn");
+
+  if (!email || !password) {
+    showError("Please enter email & password");
+    return;
+  }
+
+  // loading state
+  btn.disabled = true;
+  btn.innerHTML = `<span class="loading"></span> Signing in...`;
+
+  try {
+    const res = await fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showError(data.msg || "Login failed");
+      return;
+    }
+
+    // ROLE CHECK
+    if (data.user.role !== selectedRole) {
+      showError(`You are ${data.user.role}, please select correct role`);
+      return;
+    }
+
+    // SAVE SESSION
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    // REDIRECT
+    if (data.user.role === "shop") {
+      window.location.href = "./shop/frontend/adminDashboard/dashboard.html";
+    } 
+    else if (data.user.role === "repair") {
+      window.location.href = "./repair/frontend/dashboard/admin/Dashboard.html";
+    } 
+    else {
+      window.location.href = "./recycle/frontend/dashboard/admindashboard.html";
+    }
+
+  } catch (err) {
+    console.error(err);
+    showError("Server not reachable. Check backend.");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fas fa-arrow-right"></i> Sign In`;
+  }
+});
+</script>
+</body>
+</html>

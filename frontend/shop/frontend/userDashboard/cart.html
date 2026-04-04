@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPTO · Cart & Payment | Complete Checkout</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #f4f7fc;
+            color: #1e293b;
+        }
+
+        /* Main Container */
+        .checkout-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 32px;
+        }
+
+        /* Header */
+        .checkout-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .checkout-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(145deg, #0b1e42, #1e3a6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-link {
+            background: white;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            color: #0b1e42;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #dee9f5;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .back-link:hover {
+            border-color: #ff9900;
+            transform: translateX(-4px);
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            background: white;
+            padding: 18px 40px;
+            border-radius: 80px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            border: 1px solid #ecf3fe;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #9babc5;
+            font-weight: 500;
+        }
+
+        .step.active {
+            color: #ff9900;
+            font-weight: 700;
+        }
+
+        .step.completed {
+            color: #22a65e;
+        }
+
+        .step i {
+            font-size: 1.4rem;
+            background: #f0f5ff;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .step.active i {
+            background: #ff9900;
+            color: white;
+        }
+
+        .step.completed i {
+            background: #22a65e;
+            color: white;
+        }
+
+        /* Main Layout */
+        .cart-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 32px;
+        }
+
+        /* Cart Items Panel */
+        .cart-panel {
+            background: white;
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid #ecf3fe;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.05);
+        }
+
+        .cart-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f5ff;
+            font-weight: 600;
+            color: #4f658d;
+        }
+
+        /* Cart Items */
+        .cart-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto auto auto;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 0;
+            border-bottom: 1px solid #edf2f9;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-img {
+            width: 70px;
+            height: 70px;
+            background: #eaf0f8;
+            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #dbe6f2;
+        }
+
+        .cart-item-info h4 {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0b1e42;
+            margin-bottom: 6px;
+        }
+
+        .cart-item-info p {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .cart-item-price {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #ff9900;
+        }
+
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f5ff;
+            padding: 6px 12px;
+            border-radius: 40px;
+        }
+
+        .qty-btn {
+            background: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: 700;
+            cursor: pointer;
+            color: #ff9900;
+            transition: 0.2s;
+        }
+
+        .qty-btn:hover {
+            background: #ff9900;
+            color: white;
+        }
+
+        .remove-item {
+            color: #b0c0d6;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .remove-item:hover {
+            background: #ffe6e6;
+            color: #d14545;
+        }
+
+        .item-total {
+            font-weight: 700;
+            text-align: right;
+        }
+
+        /* Order Summary */
+        .summary-panel {
+            background: white;
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid #ecf3fe;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 30px;
+        }
+
+        .summary-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0b1e42;
+            margin-bottom: 24px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #edf2f9;
+            color: #2d3a5e;
+        }
+
+        .summary-row.total {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #0b1e42;
+            border-bottom: none;
+            padding-top: 20px;
+        }
+
+        .promo-section {
+            margin: 20px 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .promo-section input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid #d4e0f0;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .promo-section button {
+            background: #0b1e42;
+            color: white;
+            border: none;
+            padding: 0 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .checkout-btn {
+            background: #ff9900;
+            color: #0b1e42;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: 0.2s;
+        }
+
+        .checkout-btn:hover {
+            background: #ffaa2a;
+            transform: scale(1.01);
+        }
+
+        /* Payment Modal */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .payment-modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .payment-container {
+            background: white;
+            border-radius: 48px;
+            max-width: 550px;
+            width: 90%;
+            padding: 36px;
+            transform: scale(0.95);
+            transition: 0.2s;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .payment-modal.active .payment-container {
+            transform: scale(1);
+        }
+
+        .payment-container h2 {
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+            color: #0b1e42;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 16px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .pay-method {
+            flex: 1;
+            border: 2px solid #e4ecf7;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 100px;
+        }
+
+        .pay-method.selected {
+            border-color: #ff9900;
+            background: #fff9f0;
+        }
+
+        .pay-method i {
+            font-size: 2rem;
+            color: #ff9900;
+            margin-bottom: 8px;
+        }
+
+        .payment-form {
+            margin: 24px 0;
+        }
+
+        .payment-form input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #d4e0f0;
+            border-radius: 60px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .pay-now-btn {
+            background: #ff9900;
+            color: #0b1e42;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+
+        .cancel-btn {
+            background: #eef2fa;
+            color: #0b1e42;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        /* Success Modal */
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .success-modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .success-container {
+            background: white;
+            border-radius: 48px;
+            max-width: 450px;
+            width: 90%;
+            padding: 48px 36px;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #22a65e;
+            background: #e0ffea;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .success-container h3 {
+            font-size: 1.8rem;
+            color: #0b1e42;
+            margin-bottom: 12px;
+        }
+
+        .order-id {
+            background: #f0f5ff;
+            padding: 10px 20px;
+            border-radius: 40px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        /* Empty Cart */
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-cart i {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Toast */
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0b1e42;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 60px;
+            z-index: 2200;
+            animation: fadeOut 2s forwards;
+            font-weight: 500;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+        }
+
+        @media (max-width: 900px) {
+            .cart-layout {
+                grid-template-columns: 1fr;
+            }
+            .cart-item {
+                grid-template-columns: 60px 1fr auto;
+                gap: 12px;
+            }
+            .item-total {
+                grid-column: span 3;
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <!-- Header -->
+        <div class="checkout-header">
+            <h1><i class="fas fa-shopping-cart" style="color:#ff9900;"></i> Your Cart</h1>
+            <div class="back-link" onclick="window.location.href = '../../shop.html';">
+                <i class="fas fa-arrow-left"></i> Continue Shopping
+            </div>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step active" id="stepCart">
+                <i class="fas fa-shopping-basket"></i>
+                <span>Cart</span>
+            </div>
+            <div class="step" id="stepPayment">
+                <i class="fas fa-credit-card"></i>
+                <span>Payment</span>
+            </div>
+            <div class="step" id="stepSuccess">
+                <i class="fas fa-check-circle"></i>
+                <span>Success</span>
+            </div>
+        </div>
+
+        <!-- Cart Section -->
+        <div id="cartSection">
+            <div class="cart-layout">
+                <!-- Cart Items -->
+                <div class="cart-panel">
+                    <div class="cart-header-row">
+                        <span>Product</span>
+                        <span>Price</span>
+                        <span>Quantity</span>
+                        <span>Total</span>
+                    </div>
+                    <div id="cartItemsList"></div>
+                    <div style="margin-top: 20px; color: #64748b; font-size: 0.9rem;">
+                        <i class="fas fa-truck"></i> Free shipping on orders above ₹1,499
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="summary-panel">
+                    <div class="summary-title">Order Summary</div>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">₹0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span id="shipping">₹99</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (GST 18%)</span>
+                        <span id="tax">₹0</span>
+                    </div>
+                    <div class="promo-section">
+                        <input type="text" id="promoCode" placeholder="Promo code">
+                        <button onclick="applyPromo()">Apply</button>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="totalAmount">₹0</span>
+                    </div>
+                    <button class="checkout-btn" onclick="proceedToPayment()">
+                        <i class="fas fa-lock"></i> Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-container">
+            <h2><i class="fas fa-credit-card" style="color:#ff9900;"></i> Payment Details</h2>
+            
+            <div class="payment-methods">
+                <div class="pay-method selected" onclick="selectPaymentMethod('card')" id="methodCard">
+                    <i class="fas fa-credit-card"></i>
+                    <div>Card</div>
+                </div>
+                <div class="pay-method" onclick="selectPaymentMethod('upi')" id="methodUpi">
+                    <i class="fab fa-google-pay"></i>
+                    <div>UPI</div>
+                </div>
+                <div class="pay-method" onclick="selectPaymentMethod('cod')" id="methodCod">
+                    <i class="fas fa-truck"></i>
+                    <div>Cash on Delivery</div>
+                </div>
+            </div>
+            
+            <!-- Card Form -->
+            <div id="cardForm" class="payment-form">
+                <input type="text" placeholder="Card Number" id="cardNumber" value="4242 4242 4242 4242">
+                <div style="display: flex; gap: 12px;">
+                    <input type="text" placeholder="MM/YY" id="cardExpiry" value="12/28" style="flex:1">
+                    <input type="text" placeholder="CVV" id="cardCvv" value="123" style="flex:1">
+                </div>
+                <input type="text" placeholder="Name on Card" id="cardName" value="John Doe">
+            </div>
+            
+            <!-- UPI Form -->
+            <div id="upiForm" class="payment-form" style="display: none;">
+                <input type="text" placeholder="UPI ID (e.g., name@okhdfcbank)" id="upiId">
+                <div style="text-align: center; margin-top: 16px;">
+                    <i class="fab fa-google-pay" style="font-size: 2rem; margin: 0 8px; color: #ff9900;"></i>
+                    <i class="fab fa-amazon-pay" style="font-size: 2rem; margin: 0 8px; color: #ff9900;"></i>
+                    <i class="fas fa-mobile-alt" style="font-size: 2rem; margin: 0 8px; color: #ff9900;"></i>
+                </div>
+            </div>
+            
+            <!-- COD Form -->
+            <div id="codForm" class="payment-form" style="display: none;">
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-truck" style="font-size: 3rem; color: #ff9900;"></i>
+                    <p style="margin-top: 12px;">Pay with cash when your order arrives</p>
+                    <p style="color: #64748b; font-size: 0.85rem;">Additional ₹50 handling fee may apply</p>
+                </div>
+            </div>
+            
+            <button class="pay-now-btn" onclick="processPayment()">
+                <i class="fas fa-lock"></i> Pay Now · <span id="payAmount">₹0</span>
+            </button>
+            <button class="cancel-btn" onclick="closePaymentModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="success-container">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>Order Confirmed!</h3>
+            <p>Thank you for shopping with REPTO</p>
+            <div class="order-id" id="orderIdDisplay">
+                <i class="fas fa-receipt"></i> Order #REPTO-10248
+            </div>
+            <p style="color: #64748b; margin-bottom: 20px;">Confirmation sent to your email</p>
+            <button class="pay-now-btn" onclick="  window.location.href = '../../shop.html'; ">
+                <i class="fas fa-store"></i> Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // REPTO CART & PAYMENT PAGE - Complete Checkout Solution
+        // ============================================================
+        
+        // Cart Data
+        let cartItems = [
+            { id: 1, name: "iPhone 15 Pro", price: 129999, quantity: 1, img: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=150&auto=format" },
+            { id: 2, name: "Sony WH-1000XM5", price: 29999, quantity: 1, img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=150&auto=format" },
+            { id: 3, name: "MacBook Pro 16", price: 219999, quantity: 1, img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=150&auto=format" }
+        ];
+        
+        let promoApplied = false;
+        let selectedPayment = 'card';
+        let currentOrderId = '';
+        
+        // Storage Keys (for dashboard integration)
+        const STORAGE_KEYS = {
+            ORDERS: 'repto_orders',
+            CART: 'repto_cart',
+            USER: 'repto_user_profile'
+        };
+        
+        // User Profile
+        let userProfile = {
+            name: 'John Doe',
+            email: 'john@example.com'
+        };
+        
+        // Load saved cart from localStorage
+        function loadCart() {
+            const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
+            if (savedCart) {
+                cartItems = JSON.parse(savedCart);
+            }
+            renderCart();
+        }
+        
+        // Save cart to localStorage
+        function saveCart() {
+            localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cartItems));
+        }
+        
+        // Render cart items
+        function renderCart() {
+            const container = document.getElementById('cartItemsList');
+            
+            if (cartItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>Your cart is empty</p>
+                        <button class="checkout-btn" style="margin-top: 20px; width: auto; padding: 12px 32px;" onclick="continueShopping()">
+                            Start Shopping →
+                        </button>
+                    </div>
+                `;
+                updateSummary();
+                return;
+            }
+            
+            let html = '';
+            cartItems.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-img" style="background-image: url('${item.img}');"></div>
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <p><i class="fas fa-shield-alt"></i> 1 Year Warranty</p>
+                        </div>
+                        <div class="cart-item-price">₹${item.price.toLocaleString()}</div>
+                        <div class="cart-item-qty">
+                            <button class="qty-btn" onclick="updateQuantity(${index}, -1)">−</button>
+                            <span>${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                        </div>
+                        <div class="item-total">₹${itemTotal.toLocaleString()}</div>
+                        <div class="remove-item" onclick="removeItem(${index})">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            updateSummary();
+        }
+        
+        // Update quantity
+        window.updateQuantity = function(index, delta) {
+            const newQty = cartItems[index].quantity + delta;
+            if (newQty > 0) {
+                cartItems[index].quantity = newQty;
+            } else {
+                cartItems.splice(index, 1);
+            }
+            saveCart();
+            renderCart();
+            showToast('Cart updated');
+        };
+        
+        // Remove item
+        window.removeItem = function(index) {
+            cartItems.splice(index, 1);
+            saveCart();
+            renderCart();
+            showToast('Item removed');
+        };
+        
+        // Update order summary
+        function updateSummary() {
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = subtotal > 1499 ? 0 : 99;
+            const tax = Math.round(subtotal * 0.18);
+            let total = subtotal + shipping + tax;
+            
+            if (promoApplied) {
+                total = Math.round(total * 0.9);
+            }
+            
+            document.getElementById('subtotal').innerHTML = `₹${subtotal.toLocaleString()}`;
+            document.getElementById('shipping').innerHTML = shipping === 0 ? 'Free' : `₹${shipping}`;
+            document.getElementById('tax').innerHTML = `₹${tax.toLocaleString()}`;
+            document.getElementById('totalAmount').innerHTML = `₹${total.toLocaleString()}`;
+            document.getElementById('payAmount').innerHTML = `₹${total.toLocaleString()}`;
+        }
+        
+        // Apply promo code
+        window.applyPromo = function() {
+            const input = document.getElementById('promoCode');
+            if (input.value.trim().toUpperCase() === 'REPTO10') {
+                promoApplied = true;
+                updateSummary();
+                showToast('🎉 10% discount applied!');
+                input.value = '';
+            } else {
+                showToast('❌ Invalid promo code. Try REPTO10');
+            }
+        };
+        
+        // Proceed to payment
+        window.proceedToPayment = function() {
+            if (cartItems.length === 0) {
+                showToast('Your cart is empty!');
+                return;
+            }
+            document.getElementById('paymentModal').classList.add('active');
+        };
+        
+        // Close payment modal
+        window.closePaymentModal = function() {
+            document.getElementById('paymentModal').classList.remove('active');
+        };
+        
+        // Select payment method
+        window.selectPaymentMethod = function(method) {
+            selectedPayment = method;
+            document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
+            if (method === 'card') document.getElementById('methodCard').classList.add('selected');
+            if (method === 'upi') document.getElementById('methodUpi').classList.add('selected');
+            if (method === 'cod') document.getElementById('methodCod').classList.add('selected');
+            
+            document.getElementById('cardForm').style.display = method === 'card' ? 'block' : 'none';
+            document.getElementById('upiForm').style.display = method === 'upi' ? 'block' : 'none';
+            document.getElementById('codForm').style.display = method === 'cod' ? 'block' : 'none';
+        };
+        
+        // Process payment
+        window.processPayment = function() {
+            const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = totalAmount > 1499 ? 0 : 99;
+            const tax = Math.round(totalAmount * 0.18);
+            let finalTotal = totalAmount + shipping + tax;
+            if (promoApplied) finalTotal = Math.round(finalTotal * 0.9);
+            
+            showToast('⏳ Processing payment...');
+            
+            setTimeout(() => {
+                // Create order
+                currentOrderId = 'REPTO-' + Math.floor(10000 + Math.random() * 90000);
+                const order = {
+                    id: 'ORD-' + Date.now(),
+                    orderNumber: currentOrderId,
+                    createdAt: new Date().toISOString(),
+                    totalAmount: finalTotal,
+                    status: 'Confirmed',
+                    paymentMethod: selectedPayment,
+                    items: cartItems.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: item.quantity
+                    })),
+                    userEmail: userProfile.email,
+                    userName: userProfile.name
+                };
+                
+                // Save order to localStorage for dashboard
+                let orders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+                orders = orders ? JSON.parse(orders) : [];
+                orders.unshift(order);
+                localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+                
+                // Clear cart
+                cartItems = [];
+                saveCart();
+                
+                // Close payment modal and show success
+                closePaymentModal();
+                document.getElementById('orderIdDisplay').innerHTML = `<i class="fas fa-receipt"></i> Order #${currentOrderId}`;
+                document.getElementById('successModal').classList.add('active');
+                
+                // Update step indicators
+                document.getElementById('stepCart').classList.remove('active');
+                document.getElementById('stepPayment').classList.remove('active');
+                document.getElementById('stepSuccess').classList.add('active');
+                document.getElementById('stepSuccess').classList.add('completed');
+                
+                showToast('✅ Payment successful! Order placed');
+            }, 1500);
+        };
+        
+        // Continue shopping
+        window.continueShopping = function() {
+            // Close modals and reset
+            document.getElementById('successModal').classList.remove('active');
+            document.getElementById('paymentModal').classList.remove('active');
+            
+            // Reset step indicators
+            document.getElementById('stepCart').classList.add('active');
+            document.getElementById('stepPayment').classList.remove('active');
+            document.getElementById('stepSuccess').classList.remove('active');
+            document.getElementById('stepSuccess').classList.remove('completed');
+            
+            // Reload cart
+            loadCart();
+            showToast('Continue shopping');
+        };
+        
+        // Show toast message
+        function showToast(message) {
+            const existing = document.querySelector('.toast-message');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.innerHTML = `<i class="fas fa-bell" style="margin-right: 10px;"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+        
+        // Load user profile
+        function loadUserProfile() {
+            const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
+            if (savedUser) {
+                userProfile = JSON.parse(savedUser);
+            }
+        }
+        
+        // Initialize
+        loadUserProfile();
+        loadCart();
+        selectPaymentMethod('card');
+        
+        // Make functions global
+        window.updateQuantity = updateQuantity;
+        window.removeItem = removeItem;
+        window.applyPromo = applyPromo;
+        window.proceedToPayment = proceedToPayment;
+        window.closePaymentModal = closePaymentModal;
+        window.selectPaymentMethod = selectPaymentMethod;
+        window.processPayment = processPayment;
+        window.continueShopping = continueShopping;
+    </script>
+</body>
+</html>

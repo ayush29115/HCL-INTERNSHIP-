@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO · Complete Dashboard | Orders, Address, Track & Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f5f9ff; color: #1e293b; overflow-x: hidden; }
+        .dashboard-container { display: flex; min-height: 100vh; }
+        .user-sidebar { width: 280px; background: linear-gradient(180deg, #0c112a 0%, #0a0f24 100%); color: #e2e8f0; padding: 28px 20px; border-right: 1px solid rgba(255, 153, 0, 0.25); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid rgba(255, 153, 0, 0.3); }
+        .brand-icon { background: #ff9900; width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #0a0f2c; }
+        .brand-text h2 { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #ffb347, #ff7e05); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-text p { font-size: 0.7rem; color: #8b9ac2; }
+        .nav-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin: 6px 0; border-radius: 16px; font-weight: 500; color: #b9c3e6; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
+        .nav-item i { width: 24px; font-size: 1.2rem; color: #ffb347; }
+        .nav-item:hover { background: rgba(255, 153, 0, 0.12); color: #ffd9a5; border-color: rgba(255, 153, 0, 0.3); }
+        .nav-item.active { background: linear-gradient(95deg, rgba(255,153,0,0.18), rgba(255,153,0,0.05)); border-left: 3px solid #ff9900; color: #ffffff; }
+        .nav-item.active i { color: #ffbb55; }
+        .nav-item.logout-item { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #ffaa88; }
+        .sidebar-footer { margin-top: auto; padding-top: 32px; font-size: 0.75rem; color: #6f7c9f; border-top: 1px solid rgba(255,255,255,0.08); }
+        .main-content { flex: 1; padding: 32px 40px; background: #f8fafd; overflow-y: auto; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 18px; }
+        .greeting h1 { font-size: 1.9rem; font-weight: 700; color: #0a2540; }
+        .greeting p { color: #5c6f87; margin-top: 6px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+        .right-actions { display: flex; align-items: center; gap: 16px; }
+        .cart-badge { background: white; padding: 8px 18px; border-radius: 60px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); border: 1px solid #e6edf5; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .cart-badge:hover { border-color: #ff9900; background: #fffbf5; transform: translateY(-2px); }
+        .cart-badge i { color: #ff9900; }
+        .cart-count { background: #ff9900; color: #0a0f2c; border-radius: 30px; padding: 2px 8px; font-size: 0.75rem; font-weight: 800; margin-left: 4px; }
+        .profile-chip { display: flex; align-items: center; gap: 14px; background: white; padding: 8px 20px 8px 18px; border-radius: 60px; border: 1px solid #e6edf5; cursor: pointer; transition: all 0.2s; }
+        .profile-chip:hover { border-color: #ff9900; background: #fffbf5; }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-bottom: 40px; }
+        .stat-card { background: white; border-radius: 28px; padding: 20px 22px; border: 1px solid #eef2fa; display: flex; align-items: center; gap: 16px; }
+        .stat-icon-bg { width: 56px; height: 56px; background: #fff0e0; border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #ff9900; }
+        .stat-info h4 { font-size: 0.85rem; font-weight: 500; color: #5b6e8c; }
+        .stat-number { font-size: 1.9rem; font-weight: 800; color: #0a2540; line-height: 1.2; }
+        .two-columns { display: grid; grid-template-columns: 1.6fr 1fr; gap: 28px; margin-bottom: 36px; }
+        .dashboard-card { background: white; border-radius: 32px; padding: 24px 26px; border: 1px solid #eef2fa; min-height: 350px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .card-header h3 { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #14273e; }
+        .link-action { color: #ff9900; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+        .link-action:hover { color: #ffb347; text-decoration: underline; }
+        .order-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #f0f3fa; cursor: pointer; transition: 0.1s; }
+        .order-item:last-child { border-bottom: none; }
+        .order-item:hover { background: #fefaf5; margin: 0 -8px; padding: 16px 8px; border-radius: 20px; }
+        .order-id { font-weight: 700; color: #0b2b44; }
+        .order-date { font-size: 0.75rem; color: #7a89aa; margin-top: 4px; }
+        .order-amount { font-weight: 700; color: #1e293b; }
+        .status-badge { padding: 5px 14px; border-radius: 40px; font-size: 0.7rem; font-weight: 700; }
+        .status-confirmed { background: #e3f7ec; color: #1e6f3f; }
+        .status-shipped { background: #e8f0fe; color: #1f6392; }
+        .status-delivered { background: #e3f7ec; color: #1e6f3f; }
+        .status-processing { background: #fff1e0; color: #c46f0a; }
+        .wishlist-row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f0f3fa; cursor: pointer; }
+        .wishlist-img { width: 52px; height: 52px; background-size: cover; background-position: center; border-radius: 18px; background-color: #f2f6fc; }
+        .wishlist-info { flex: 1; }
+        .wishlist-name { font-weight: 700; margin-bottom: 4px; }
+        .wishlist-price { font-size: 0.85rem; font-weight: 600; color: #ff9900; }
+        .remove-wishlist { color: #b9c3da; padding: 6px; cursor: pointer; transition: 0.2s; }
+        .remove-wishlist:hover { color: #e5484d; }
+        .account-summary { background: white; border-radius: 32px; padding: 20px 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin-top: 8px; border: 1px solid #eef2fa; }
+        .summary-badge { display: flex; align-items: center; gap: 16px; cursor: pointer; }
+        .summary-badge i { font-size: 1.8rem; color: #ff9900; background: #fff0e0; width: 52px; height: 52px; border-radius: 30px; display: flex; align-items: center; justify-content: center; }
+        .btn-outline-gold { background: transparent; border: 1.5px solid #ff9900; padding: 12px 28px; border-radius: 40px; font-weight: 700; color: #0f1a2f; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-outline-gold:hover { background: #ff9900; color: #0a0f2c; }
+        .store-nav { display: inline-flex; align-items: center; gap: 10px; background: #0f1a2f; color: white; padding: 12px 28px; border-radius: 60px; font-weight: 600; cursor: pointer; border: 1px solid #ff9900; margin-top: 24px; }
+        .store-nav i { color: #ff9900; }
+        .store-nav:hover { background: #ff9900; color: #0f1a2f; }
+        .logout-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); z-index: 4000; align-items: center; justify-content: center; }
+        .logout-modal.active { display: flex; }
+        .modal-card { background: white; max-width: 420px; width: 90%; border-radius: 36px; padding: 32px 28px; text-align: center; }
+        .modal-buttons { display: flex; gap: 16px; justify-content: center; margin-top: 20px; }
+        .btn-cancel { background: #f1f5f9; color: #334155; padding: 12px 28px; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-logout-confirm { background: #ef4444; color: white; padding: 12px 28px; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; }
+        .toast-notify { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #0f1f38; color: white; padding: 12px 32px; border-radius: 60px; font-weight: 500; z-index: 3000; animation: fadeSlide 2s forwards; }
+        @keyframes fadeSlide { 0% { opacity: 0; transform: translate(-50%, 20px); } 15% { opacity: 1; transform: translate(-50%, 0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+        .empty-state { text-align: center; padding: 48px 24px; color: #6f7c9f; }
+        .empty-state i { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+        
+        /* Order Detail Modal */
+        .detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .detail-modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .detail-container {
+            background: white;
+            border-radius: 40px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+            transform: scale(0.95);
+            transition: 0.2s;
+        }
+        .detail-modal.active .detail-container {
+            transform: scale(1);
+        }
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f5ff;
+        }
+        .detail-header h2 {
+            font-size: 1.5rem;
+            color: #0b1e42;
+        }
+        .close-detail {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: 0.2s;
+        }
+        .close-detail:hover {
+            color: #ff9900;
+            transform: rotate(90deg);
+        }
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 24px;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .info-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-weight: 700;
+            color: #0b1e42;
+            font-size: 1rem;
+        }
+        .track-status {
+            margin: 24px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff9f0, #fff);
+            border-radius: 24px;
+            border: 1px solid #ffecd6;
+        }
+        .track-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            position: relative;
+        }
+        .track-step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        .track-step .step-icon {
+            width: 40px;
+            height: 40px;
+            background: #eef2fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            color: #94a3b8;
+        }
+        .track-step.completed .step-icon {
+            background: #22a65e;
+            color: white;
+        }
+        .track-step.active .step-icon {
+            background: #ff9900;
+            color: white;
+        }
+        .track-step .step-label {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .track-step.completed .step-label,
+        .track-step.active .step-label {
+            font-weight: 600;
+            color: #0b1e42;
+        }
+        .order-items-list {
+            margin: 20px 0;
+        }
+        .order-item-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #edf2f9;
+        }
+        .order-item-name {
+            font-weight: 600;
+        }
+        .order-item-price {
+            font-weight: 700;
+            color: #ff9900;
+        }
+        .address-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #eef2fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .address-default {
+            background: #fff9f0;
+            border-color: #ff9900;
+        }
+        .address-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            margin-left: 8px;
+            border-radius: 8px;
+        }
+        .edit-addr-btn { color: #ff9900; }
+        .delete-addr-btn { color: #e5484d; }
+        
+        @media (max-width: 1100px) {
+            .stats-row { grid-template-columns: repeat(2,1fr); }
+            .two-columns { grid-template-columns: 1fr; }
+            .main-content { padding: 24px 20px; }
+            .order-info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <aside class="user-sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-bolt"></i></div>
+            <div class="brand-text"><h2>REPTO</h2><p>complete account</p></div>
+        </div>
+        <div class="nav-item active" data-section="dashboard"><i class="fas fa-chart-line"></i> <span>Dashboard</span></div>
+        <div class="nav-item" data-section="orders"><i class="fas fa-shopping-bag"></i> <span>My Orders</span></div>
+        <div class="nav-item" data-section="wishlist"><i class="fas fa-heart"></i> <span>Wishlist</span></div>
+        <div class="nav-item" data-section="address"><i class="fas fa-map-marker-alt"></i> <span>Addresses</span></div>
+        <div class="nav-item logout-item" id="logoutSidebarBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></div>
+        <div class="sidebar-footer"><i class="fas fa-shield-alt"></i> <span id="sidebarUserEmail">—</span><br>Member since <span id="memberSince">2025</span></div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div class="greeting">
+                <h1>Hello, <span id="userNameDisplay">—</span> 👋</h1>
+                <p><i class="fas fa-location-dot" style="color:#ff9900;"></i> <span id="primaryAddressText">—</span></p>
+            </div>
+            <div class="right-actions">
+                <div class="cart-badge" id="cartCountBadge">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Cart</span>
+                    <span class="cart-count" id="cartItemCount">0</span>
+                </div>
+                <div class="profile-chip" id="profileChip">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="profileChipName">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-icon-bg"><i class="fas fa-truck-fast"></i></div><div class="stat-info"><h4>Total Orders</h4><div class="stat-number" id="totalOrdersCount">0</div></div></div>
+            <div class="stat-card"><div class="stat-icon-bg"><i class="fas fa-heart"></i></div><div class="stat-info"><h4>Wishlist Items</h4><div class="stat-number" id="wishlistStatCount">0</div></div></div>
+            <div class="stat-card"><div class="stat-icon-bg"><i class="fas fa-coins"></i></div><div class="stat-info"><h4>REPTO Coins</h4><div class="stat-number" id="reptoCoins">0</div></div></div>
+            <div class="stat-card"><div class="stat-icon-bg"><i class="fas fa-percent"></i></div><div class="stat-info"><h4>Loyalty Tier</h4><div class="stat-number" style="font-size:1.3rem;" id="loyaltyTier">Bronze</div></div></div>
+        </div>
+
+        <div id="dynamicPanel"></div>
+
+        <div class="account-summary">
+            <div class="summary-badge" id="addrSummaryTrigger"><i class="fas fa-home"></i><div><p>Home Address</p><p id="addrShort" style="font-size:0.8rem;">—</p></div></div>
+            <div class="summary-badge" id="rewardSummaryTrigger"><i class="fas fa-gem"></i><div><p>Rewards</p><p id="rewardShort" style="font-size:0.8rem;">—</p></div></div>
+            <button class="btn-outline-gold" id="editProfileBtn"><i class="fas fa-user-edit"></i> Edit Profile</button>
+        </div>
+
+        <div class="store-nav" id="backToStoreBtn"><i class="fas fa-store"></i> Continue Shopping</div>
+    </main>
+</div>
+
+<div id="logoutModal" class="logout-modal">
+    <div class="modal-card"><i class="fas fa-sign-out-alt" style="font-size:2rem; color:#ff9900;"></i><h3 style="margin:16px 0;">Ready to leave?</h3><p>You'll be logged out of your REPTO account.</p><div class="modal-buttons"><button class="btn-cancel" id="cancelLogoutBtn">Cancel</button><button class="btn-logout-confirm" id="confirmLogoutBtn">Yes, Logout</button></div></div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="detail-modal" id="orderDetailModal">
+    <div class="detail-container">
+        <div class="detail-header">
+            <h2><i class="fas fa-receipt" style="color:#ff9900;"></i> Order Details</h2>
+            <button class="close-detail" onclick="closeOrderDetail()">&times;</button>
+        </div>
+        <div id="orderDetailContent"></div>
+    </div>
+</div>
+
+<!-- Add Address Modal -->
+<div class="detail-modal" id="addAddressModal">
+    <div class="detail-container" style="max-width: 500px;">
+        <div class="detail-header">
+            <h2><i class="fas fa-map-marker-alt"></i> Add New Address</h2>
+            <button class="close-detail" onclick="closeAddAddressModal()">&times;</button>
+        </div>
+        <div style="padding: 10px 0;">
+            <input type="text" id="newAddressLine" placeholder="Street Address" style="width:100%; padding:14px; border:1px solid #dee6f2; border-radius:16px; margin-bottom:12px;">
+            <input type="text" id="newCity" placeholder="City" style="width:100%; padding:14px; border:1px solid #dee6f2; border-radius:16px; margin-bottom:12px;">
+            <input type="text" id="newZip" placeholder="Zip Code" style="width:100%; padding:14px; border:1px solid #dee6f2; border-radius:16px; margin-bottom:12px;">
+            <select id="newType" style="width:100%; padding:14px; border:1px solid #dee6f2; border-radius:16px; margin-bottom:20px;">
+                <option value="home">Home</option>
+                <option value="office">Office</option>
+                <option value="other">Other</option>
+            </select>
+            <button class="btn-outline-gold" style="width:100%;" onclick="saveNewAddress()">Save Address</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // REPTO DASHBOARD - COMPLETE WITH ORDER DETAILS, TRACKING, ADDRESSES
+    // ============================================================
+    
+    const STORAGE_KEYS = {
+        ORDERS: 'repto_orders',
+        WISHLIST: 'repto_wishlist',
+        ADDRESSES: 'repto_addresses',
+        CART: 'repto_cart',
+        USER_PROFILE: 'repto_user_profile'
+    };
+    
+    let userOrders = [];
+    let userWishlist = [];
+    let userAddresses = [];
+    let cartItems = [];
+    let userProfile = {
+        firstName: 'Alex',
+        name: 'Alex Johnson',
+        email: 'alex@repto.com',
+        memberSince: new Date().toISOString().split('T')[0],
+        reptoCoins: 1250,
+        loyaltyTier: 'Silver',
+        rewardDesc: '1x coins on every purchase'
+    };
+    
+    function showToast(message) {
+        const existing = document.querySelector('.toast-notify');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-notify';
+        toast.innerHTML = `<i class="fas fa-bell" style="margin-right: 10px; color:#ff9900;"></i> ${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+    
+    function loadRealUserData() {
+        const storedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+        userOrders = storedOrders ? JSON.parse(storedOrders) : [];
+        
+        const storedWishlist = localStorage.getItem(STORAGE_KEYS.WISHLIST);
+        userWishlist = storedWishlist ? JSON.parse(storedWishlist) : [];
+        
+        const storedAddresses = localStorage.getItem(STORAGE_KEYS.ADDRESSES);
+        userAddresses = storedAddresses ? JSON.parse(storedAddresses) : [
+            { id: 'addr1', type: 'home', addressLine1: '42 Tech Park, MG Road', city: 'Bangalore', zipCode: '560001', isDefault: true }
+        ];
+        
+        const storedCart = localStorage.getItem(STORAGE_KEYS.CART);
+        cartItems = storedCart ? JSON.parse(storedCart) : [];
+        
+        const storedProfile = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
+        if (storedProfile) {
+            Object.assign(userProfile, JSON.parse(storedProfile));
+        }
+        
+        const totalSpent = userOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+        userProfile.reptoCoins = Math.floor(totalSpent / 500) * 50 + 500;
+        
+        if (userOrders.length >= 10) userProfile.loyaltyTier = 'Diamond 👑';
+        else if (userOrders.length >= 5) userProfile.loyaltyTier = 'Gold ⭐';
+        else if (userOrders.length >= 2) userProfile.loyaltyTier = 'Silver 🥈';
+        else userProfile.loyaltyTier = 'Bronze 🥉';
+        
+        userProfile.rewardDesc = userProfile.loyaltyTier === 'Diamond 👑' ? '3x coins + priority support' :
+                                 userProfile.loyaltyTier === 'Gold ⭐' ? '2x coins + free shipping' :
+                                 userProfile.loyaltyTier === 'Silver 🥈' ? '1.5x coins' : 'Earn coins on every purchase';
+        
+        localStorage.setItem(STORAGE_KEYS.ADDRESSES, JSON.stringify(userAddresses));
+        localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(userProfile));
+    }
+    
+    function saveWishlist() { localStorage.setItem(STORAGE_KEYS.WISHLIST, JSON.stringify(userWishlist)); }
+    function saveAddresses() { localStorage.setItem(STORAGE_KEYS.ADDRESSES, JSON.stringify(userAddresses)); }
+    
+    function updateCartBadge() {
+        const cartCountSpan = document.getElementById('cartItemCount');
+        if (cartCountSpan) {
+            const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+            cartCountSpan.textContent = totalItems;
+        }
+    }
+    
+    function refreshUI() {
+        const displayName = userProfile.firstName || userProfile.name.split(' ')[0] || 'User';
+        document.getElementById("userNameDisplay").innerText = displayName;
+        document.getElementById("profileChipName").innerText = userProfile.name;
+        document.getElementById("sidebarUserEmail").innerText = userProfile.email;
+        document.getElementById("memberSince").innerText = userProfile.memberSince ? new Date(userProfile.memberSince).getFullYear() : '2025';
+        
+        document.getElementById("totalOrdersCount").innerText = userOrders.length;
+        document.getElementById("wishlistStatCount").innerText = userWishlist.length;
+        document.getElementById("reptoCoins").innerText = userProfile.reptoCoins;
+        document.getElementById("loyaltyTier").innerHTML = userProfile.loyaltyTier;
+        
+        const defaultAddr = userAddresses.find(a => a.isDefault) || userAddresses[0];
+        const addressText = defaultAddr ? `${defaultAddr.city}, ${defaultAddr.zipCode}` : 'No address saved';
+        document.getElementById("primaryAddressText").innerText = addressText;
+        document.getElementById("addrShort").innerHTML = defaultAddr ? (defaultAddr.addressLine1?.substring(0, 35) || 'Address') : 'Add your address';
+        document.getElementById("rewardShort").innerText = userProfile.rewardDesc;
+        
+        updateCartBadge();
+    }
+    
+    // Show Order Detail with Tracking
+    function showOrderDetail(orderId) {
+        const order = userOrders.find(o => o.id === orderId);
+        if (!order) return;
+        
+        const date = new Date(order.createdAt).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        
+        // Determine tracking status
+        const statusMap = { 'Confirmed': 1, 'Processing': 1, 'Shipped': 2, 'Delivered': 3 };
+        const currentStep = statusMap[order.status] || 1;
+        
+        let itemsHtml = '';
+        order.items.forEach(item => {
+            itemsHtml += `
+                <div class="order-item-detail">
+                    <div><div class="order-item-name">${item.name}</div><div style="font-size:0.8rem; color:#64748b;">Qty: ${item.quantity}</div></div>
+                    <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
+                </div>
+            `;
+        });
+        
+        const content = `
+            <div class="order-info-grid">
+                <div class="info-item"><span class="info-label">Order Number</span><span class="info-value">${order.orderNumber}</span></div>
+                <div class="info-item"><span class="info-label">Order Date</span><span class="info-value">${date}</span></div>
+                <div class="info-item"><span class="info-label">Order Status</span><span class="info-value" style="color:#22a65e;">${order.status}</span></div>
+                <div class="info-item"><span class="info-label">Payment Method</span><span class="info-value">${order.paymentMethod === 'card' ? '💳 Credit/Debit Card' : order.paymentMethod === 'upi' ? '📱 UPI Payment' : '🚚 Cash on Delivery'}</span></div>
+            </div>
+            
+            <div class="track-status">
+                <div style="font-weight:700; margin-bottom:16px;"><i class="fas fa-truck"></i> Order Tracking</div>
+                <div class="track-steps">
+                    <div class="track-step ${currentStep >= 1 ? 'completed' : ''}"><div class="step-icon"><i class="fas fa-check"></i></div><div class="step-label">Order Placed</div></div>
+                    <div class="track-step ${currentStep >= 2 ? 'completed' : currentStep === 1 ? 'active' : ''}"><div class="step-icon"><i class="fas fa-box"></i></div><div class="step-label">Processing</div></div>
+                    <div class="track-step ${currentStep >= 3 ? 'completed' : currentStep === 2 ? 'active' : ''}"><div class="step-icon"><i class="fas fa-shipping-fast"></i></div><div class="step-label">Shipped</div></div>
+                    <div class="track-step ${currentStep >= 4 ? 'completed' : currentStep === 3 ? 'active' : ''}"><div class="step-icon"><i class="fas fa-home"></i></div><div class="step-label">Delivered</div></div>
+                </div>
+            </div>
+            
+            <h3 style="margin: 20px 0 12px;">Items Ordered</h3>
+            <div class="order-items-list">${itemsHtml}</div>
+            
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #f0f5ff;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>Subtotal</span><span>₹${order.subtotal?.toLocaleString() || Math.round(order.totalAmount * 0.82).toLocaleString()}</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>Shipping</span><span>${order.shipping === 0 ? 'Free' : '₹' + (order.shipping || 99)}</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>Tax (GST)</span><span>₹${order.tax?.toLocaleString() || Math.round(order.totalAmount * 0.18).toLocaleString()}</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; margin-top: 12px; padding-top: 12px; border-top: 2px solid #ff9900;">
+                    <span>Total Amount</span><span style="color:#ff9900;">₹${order.totalAmount.toLocaleString()}</span>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('orderDetailContent').innerHTML = content;
+        document.getElementById('orderDetailModal').classList.add('active');
+    }
+    
+    function closeOrderDetail() {
+        document.getElementById('orderDetailModal').classList.remove('active');
+    }
+    
+    // Address Management
+    function showAddressPage() {
+        const panel = document.getElementById('dynamicPanel');
+        let addressesHtml = '';
+        
+        if (userAddresses.length === 0) {
+            addressesHtml = '<div class="empty-state"><i class="fas fa-map-marker-alt"></i><p>No saved addresses</p></div>';
+        } else {
+            addressesHtml = userAddresses.map(addr => `
+                <div class="address-card ${addr.isDefault ? 'address-default' : ''}">
+                    <div>
+                        <strong><i class="fas fa-${addr.type === 'home' ? 'home' : addr.type === 'office' ? 'building' : 'map-pin'}"></i> ${addr.type.toUpperCase()}</strong>
+                        <p style="margin-top:6px;">${addr.addressLine1}, ${addr.city}, ${addr.zipCode}</p>
+                        ${addr.isDefault ? '<span style="font-size:0.7rem; color:#ff9900;">✓ Default Address</span>' : ''}
+                    </div>
+                    <div class="address-actions">
+                        ${!addr.isDefault ? `<button class="edit-addr-btn" onclick="setDefaultAddress('${addr.id}')" title="Set as Default"><i class="fas fa-check-circle"></i></button>` : ''}
+                        <button class="delete-addr-btn" onclick="deleteAddress('${addr.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        panel.innerHTML = `
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-map-marker-alt"></i> Saved Addresses</h3>
+                    <span class="link-action" id="backToDashboardAddr">← Back to Dashboard</span>
+                </div>
+                ${addressesHtml}
+                <button class="btn-outline-gold" id="addNewAddressBtn" style="margin-top:20px; width:100%;">
+                    <i class="fas fa-plus"></i> Add New Address
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('backToDashboardAddr')?.addEventListener('click', () => renderDashboard());
+        document.getElementById('addNewAddressBtn')?.addEventListener('click', () => {
+            document.getElementById('addAddressModal').classList.add('active');
+        });
+    }
+    
+    function setDefaultAddress(addressId) {
+        userAddresses = userAddresses.map(addr => ({
+            ...addr,
+            isDefault: addr.id === addressId
+        }));
+        saveAddresses();
+        showToast('Default address updated');
+        showAddressPage();
+        refreshUI();
+    }
+    
+    function deleteAddress(addressId) {
+        const addrToDelete = userAddresses.find(a => a.id === addressId);
+        if (addrToDelete.isDefault && userAddresses.length > 1) {
+            showToast('Cannot delete default address. Set another as default first.');
+            return;
+        }
+        userAddresses = userAddresses.filter(a => a.id !== addressId);
+        saveAddresses();
+        showToast('Address deleted');
+        showAddressPage();
+        refreshUI();
+    }
+    
+    function saveNewAddress() {
+        const newAddress = {
+            id: 'addr_' + Date.now(),
+            type: document.getElementById('newType').value,
+            addressLine1: document.getElementById('newAddressLine').value,
+            city: document.getElementById('newCity').value,
+            zipCode: document.getElementById('newZip').value,
+            isDefault: userAddresses.length === 0
+        };
+        
+        if (!newAddress.addressLine1 || !newAddress.city || !newAddress.zipCode) {
+            showToast('Please fill all fields');
+            return;
+        }
+        
+        userAddresses.push(newAddress);
+        saveAddresses();
+        showToast('Address added successfully');
+        closeAddAddressModal();
+        showAddressPage();
+        refreshUI();
+        
+        document.getElementById('newAddressLine').value = '';
+        document.getElementById('newCity').value = '';
+        document.getElementById('newZip').value = '';
+    }
+    
+    function closeAddAddressModal() {
+        document.getElementById('addAddressModal').classList.remove('active');
+    }
+    
+    // Orders Page with Click to View Details
+    function showOrdersPage() {
+        const panel = document.getElementById('dynamicPanel');
+        
+        if (userOrders.length === 0) {
+            panel.innerHTML = `<div class="dashboard-card"><div class="card-header"><h3><i class="fas fa-shopping-bag"></i> My Orders</h3><span class="link-action" id="backToDashboardOrders">← Back to Dashboard</span></div><div class="empty-state"><i class="fas fa-receipt"></i><p>No orders found.</p><button class="btn-outline-gold" id="shopNowOrdersBtn" style="margin-top:16px;">Start Shopping →</button></div></div>`;
+            document.getElementById('backToDashboardOrders')?.addEventListener('click', () => renderDashboard());
+            document.getElementById('shopNowOrdersBtn')?.addEventListener('click', () => { window.location.href = '../shop.html'; });
+            return;
+        }
+        
+        let ordersHtml = '';
+        userOrders.forEach(order => {
+            const orderDate = new Date(order.createdAt).toLocaleDateString();
+            ordersHtml += `
+                <div class="order-item" onclick="showOrderDetail('${order.id}')" style="cursor:pointer;">
+                    <div>
+                        <div class="order-id">${order.orderNumber}</div>
+                        <div class="order-date">${orderDate} • ${order.items?.length || 1} item(s)</div>
+                    </div>
+                    <div class="order-amount">₹${(order.totalAmount || 0).toLocaleString()}</div>
+                    <div><span class="status-badge status-${order.status?.toLowerCase()}">${order.status || 'Processing'}</span></div>
+                    <div><i class="fas fa-chevron-right" style="color:#ff9900;"></i></div>
+                </div>
+            `;
+        });
+        
+        panel.innerHTML = `
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-shopping-bag"></i> All Orders (${userOrders.length})</h3>
+                    <span class="link-action" id="backToDashboardOrders">← Back to Dashboard</span>
+                </div>
+                ${ordersHtml}
+            </div>
+        `;
+        
+        document.getElementById('backToDashboardOrders')?.addEventListener('click', () => renderDashboard());
+    }
+    
+    // Wishlist Page
+    function showWishlistPage() {
+        const panel = document.getElementById('dynamicPanel');
+        
+        if (userWishlist.length === 0) {
+            panel.innerHTML = `<div class="dashboard-card"><div class="card-header"><h3><i class="fas fa-heart"></i> My Wishlist</h3><span class="link-action" id="backWishlistDash">← Back to Dashboard</span></div><div class="empty-state"><i class="fas fa-heart-broken"></i><p>Your wishlist is empty.</p><button class="btn-outline-gold" id="shopNowWishBtn" style="margin-top:16px;">Explore Products →</button></div></div>`;
+            document.getElementById('backWishlistDash')?.addEventListener('click', () => renderDashboard());
+            document.getElementById('shopNowWishBtn')?.addEventListener('click', () => { window.location.href = 'shop.html'; });
+            return;
+        }
+        
+        let wishlistHtml = '';
+        userWishlist.forEach(item => {
+            wishlistHtml += `
+                <div class="wishlist-row">
+                    <div class="wishlist-img" style="background-image: url('${item.imageUrl || 'https://placehold.co/52x52/ff9900/white?text=Tech'}');"></div>
+                    <div class="wishlist-info">
+                        <div class="wishlist-name">${escapeHtml(item.name)}</div>
+                        <div class="wishlist-price">₹${(item.price || 0).toLocaleString()}</div>
+                    </div>
+                    <div class="remove-wishlist" data-wishlist-id="${item.id}" data-wishlist-name="${escapeHtml(item.name)}"><i class="fas fa-times-circle"></i></div>
+                </div>
+            `;
+        });
+        
+        panel.innerHTML = `
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-heart"></i> My Wishlist (${userWishlist.length})</h3>
+                    <span class="link-action" id="backWishlistDash">← Back to Dashboard</span>
+                </div>
+                ${wishlistHtml}
+            </div>
+        `;
+        
+        document.getElementById('backWishlistDash')?.addEventListener('click', () => renderDashboard());
+        document.querySelectorAll('.remove-wishlist').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const wishId = btn.dataset.wishlistId;
+                const wishName = btn.dataset.wishlistName;
+                userWishlist = userWishlist.filter(item => String(item.id) !== String(wishId));
+                saveWishlist();
+                showToast(`🗑️ ${wishName} removed`);
+                refreshUI();
+                showWishlistPage();
+            });
+        });
+    }
+    
+    function renderDashboard() {
+        const panel = document.getElementById('dynamicPanel');
+        const recentOrders = [...userOrders].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+        const wishlistPreview = userWishlist.slice(0, 3);
+        
+        panel.innerHTML = `
+            <div class="two-columns">
+                <div class="dashboard-card">
+                    <div class="card-header"><h3><i class="fas fa-clock"></i> Recent orders</h3><span class="link-action" id="viewAllOrdersLink">View all (${userOrders.length}) <i class="fas fa-arrow-right"></i></span></div>
+                    <div>${recentOrders.length ? recentOrders.map(order => `
+                        <div class="order-item" onclick="showOrderDetail('${order.id}')" style="cursor:pointer;">
+                            <div><div class="order-id">${order.orderNumber || order.id.slice(-8)}</div><div class="order-date">${new Date(order.createdAt).toLocaleDateString()} • ${order.items?.length || 1} item(s)</div></div>
+                            <div class="order-amount">₹${(order.totalAmount || 0).toLocaleString()}</div>
+                            <div><span class="status-badge status-${order.status?.toLowerCase()}">${order.status || 'Processing'}</span></div>
+                        </div>`).join('') : '<div class="empty-state"><i class="fas fa-shopping-bag"></i><p>No orders yet.</p><button class="btn-outline-gold" id="shopNowBtn" style="margin-top:16px;">Shop Now →</button></div>'}</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="card-header"><h3><i class="fas fa-heart" style="color:#e03a3a;"></i> Wishlist</h3><span class="link-action" id="viewWishlistLink">View all (${userWishlist.length}) <i class="fas fa-arrow-right"></i></span></div>
+                    <div>${wishlistPreview.length ? wishlistPreview.map(item => `
+                        <div class="wishlist-row">
+                            <div class="wishlist-img" style="background-image: url('${item.imageUrl || 'https://placehold.co/52x52/ff9900/white?text=Tech'}');"></div>
+                            <div class="wishlist-info"><div class="wishlist-name">${escapeHtml(item.name)}</div><div class="wishlist-price">₹${(item.price || 0).toLocaleString()}</div></div>
+                        </div>`).join('') : '<div class="empty-state"><i class="fas fa-heart-broken"></i><p>Your wishlist is empty.</p></div>'}</div>
+                </div>
+            </div>`;
+        
+        document.getElementById('viewAllOrdersLink')?.addEventListener('click', () => showOrdersPage());
+        document.getElementById('viewWishlistLink')?.addEventListener('click', () => showWishlistPage());
+        document.getElementById('shopNowBtn')?.addEventListener('click', () => { window.location.href = '../shop.html'; });
+    }
+    
+    function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    function handleNavigation(section) {
+        if (section === 'dashboard') renderDashboard();
+        else if (section === 'orders') showOrdersPage();
+        else if (section === 'wishlist') showWishlistPage();
+        else if (section === 'address') showAddressPage();
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
+    }
+    
+    function performLogout() {
+        showToast("🔐 Logging out...");
+        setTimeout(() => { window.location.href = "../shop.html" }, 500);
+    }
+    
+    function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
+    function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
+    
+    function syncFromStorage() {
+        loadRealUserData();
+        refreshUI();
+        const activeSection = document.querySelector('.nav-item.active')?.dataset?.section;
+        if (activeSection === 'dashboard') renderDashboard();
+        else if (activeSection === 'orders') showOrdersPage();
+        else if (activeSection === 'wishlist') showWishlistPage();
+        else if (activeSection === 'address') showAddressPage();
+        else renderDashboard();
+    }
+    
+    function init() {
+        loadRealUserData();
+        refreshUI();
+        renderDashboard();
+        
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEYS.ORDERS || e.key === STORAGE_KEYS.WISHLIST || 
+                e.key === STORAGE_KEYS.CART || e.key === STORAGE_KEYS.ADDRESSES) {
+                syncFromStorage();
+            }
+        });
+    }
+    
+    document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+        item.addEventListener('click', () => handleNavigation(item.dataset.section));
+    });
+    document.getElementById('logoutSidebarBtn')?.addEventListener('click', showLogoutModal);
+    document.getElementById('cancelLogoutBtn')?.addEventListener('click', closeLogoutModal);
+    document.getElementById('confirmLogoutBtn')?.addEventListener('click', () => { closeLogoutModal(); performLogout(); });
+    document.getElementById('editProfileBtn')?.addEventListener('click', () => showToast("✏️ Edit profile coming soon"));
+    document.getElementById('backToStoreBtn')?.addEventListener('click', () => { window.location.href = "../shop.html" });
+    document.getElementById('profileChip')?.addEventListener('click', () => showToast(`👤 ${userProfile.name} | ${userProfile.email}`));
+    document.getElementById('addrSummaryTrigger')?.addEventListener('click', () => handleNavigation('address'));
+    document.getElementById('rewardSummaryTrigger')?.addEventListener('click', () => showToast(`🎖️ ${userProfile.rewardDesc}`));
+    document.getElementById('cartCountBadge')?.addEventListener('click', () => {
+        showToast(`🛒 ${cartItems.reduce((sum, i) => sum + (i.quantity || 1), 0)} item(s) in cart`);
+        setTimeout(() => { window.location.href = 'cart.html'; }, 300);
+    });
+    
+    window.showOrderDetail = showOrderDetail;
+    window.closeOrderDetail = closeOrderDetail;
+    window.setDefaultAddress = setDefaultAddress;
+    window.deleteAddress = deleteAddress;
+    window.saveNewAddress = saveNewAddress;
+    window.closeAddAddressModal = closeAddAddressModal;
+    
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO | Find Nearby Repair Stores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #60a5fa;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .location-page {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            color: #0f172a;
+        }
+
+        .page-title p {
+            color: #64748b;
+        }
+
+        /* Location Controls */
+        .location-controls {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.2rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .location-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .location-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.2rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            border-color: #3b82f6;
+        }
+
+        /* Map & Stores Grid */
+        .map-stores-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Map Section */
+        .map-section {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .map-header {
+            padding: 1rem;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .map-container {
+            height: 500px;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-placeholder {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .map-placeholder i {
+            font-size: 4rem;
+            color: #3b82f6;
+            margin-bottom: 1rem;
+        }
+
+        /* Stores List */
+        .stores-section {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .stores-header {
+            padding: 1rem;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stores-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stores-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 500px;
+            padding: 1rem;
+        }
+
+        .store-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .store-card:hover {
+            transform: translateX(5px);
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.1);
+        }
+
+        .store-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .store-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .store-distance {
+            font-size: 0.8rem;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .store-address {
+            font-size: 0.85rem;
+            color: #475569;
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .store-hours {
+            font-size: 0.8rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .store-contact {
+            font-size: 0.8rem;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .store-services {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .service-tag {
+            background: #f1f5f9;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: #475569;
+        }
+
+        .direction-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .direction-btn:hover {
+            background: #2563eb;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Store Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
+            padding: 2rem;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .map-stores-container {
+                grid-template-columns: 1fr;
+            }
+            .search-box {
+                flex-direction: column;
+            }
+            .location-btn {
+                padding: 0.8rem;
+                justify-content: center;
+            }
+            .page-title h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <nav>
+                <div class="logo">REPTO</div>
+                <ul class="nav-links">
+                    <li><a href="#" onclick="goBack()">← Back to Home</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="location-page">
+        <div class="container">
+            <div class="page-title">
+                <h1><i class="fas fa-map-marker-alt"></i> Find Nearby Repair Stores</h1>
+                <p>Locate the nearest REPTO service center for quick and reliable repairs</p>
+            </div>
+
+            <!-- Location Controls -->
+            <div class="location-controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Enter city, area, or PIN code...">
+                    <button class="location-btn" onclick="searchLocation()">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button class="location-btn" onclick="getCurrentLocation()">
+                        <i class="fas fa-location-dot"></i> Use My Location
+                    </button>
+                </div>
+                <div class="filter-buttons" id="filterButtons">
+                    <button class="filter-btn active" data-filter="all">All Stores</button>
+                    <button class="filter-btn" data-filter="smartphone">Smartphone Repair</button>
+                    <button class="filter-btn" data-filter="laptop">Laptop Repair</button>
+                    <button class="filter-btn" data-filter="tv">TV Repair</button>
+                    <button class="filter-btn" data-filter="pickup">Pick-up Available</button>
+                </div>
+            </div>
+
+            <!-- Map & Stores -->
+            <div class="map-stores-container">
+                <!-- Map Section -->
+                <div class="map-section">
+                    <div class="map-header">
+                        <i class="fas fa-map"></i> Store Locations
+                    </div>
+                    <div class="map-container" id="mapContainer">
+                        <div class="map-placeholder">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <p>📍 Click "Use My Location" to see stores near you</p>
+                            <button class="location-btn" onclick="getCurrentLocation()" style="margin-top: 1rem;">
+                                <i class="fas fa-location-dot"></i> Detect My Location
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stores List -->
+                <div class="stores-section">
+                    <div class="stores-header">
+                        <h3><i class="fas fa-store"></i> <span id="storeCount">0</span> Stores Nearby</h3>
+                    </div>
+                    <div class="stores-list" id="storesList">
+                        <div class="loading">
+                            <i class="fas fa-spinner"></i> Loading stores...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 REPTO - Expert Repair Services</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">📍 Multiple locations across Chennai | Free pick-up & drop available</p>
+        </div>
+    </footer>
+
+    <!-- Store Detail Modal -->
+    <div id="storeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalStoreName"></h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalStoreDetails"></div>
+            <button class="direction-btn" id="modalDirectionBtn" onclick="getDirections()">Get Directions</button>
+        </div>
+    </div>
+
+    <script>
+        // Store database
+        const stores = [
+            { 
+                id: 1, name: "REPTO Anna Nagar", 
+                lat: 13.0827, lng: 80.2107, 
+                address: "No.45, 2nd Avenue, Anna Nagar, Chennai - 600040",
+                phone: "+91 44 1234 5678", 
+                hours: "9:00 AM - 9:00 PM (All Days)",
+                services: ["smartphone", "laptop", "tablet", "pickup"],
+                rating: 4.8,
+                waitTime: "15-30 mins"
+            },
+            { 
+                id: 2, name: "REPTO T Nagar", 
+                lat: 13.0438, lng: 80.2337, 
+                address: "Shop No.12, North Usman Road, T Nagar, Chennai - 600017",
+                phone: "+91 44 8765 4321", 
+                hours: "10:00 AM - 8:00 PM (All Days)",
+                services: ["smartphone", "laptop", "tv", "pickup"],
+                rating: 4.6,
+                waitTime: "20-40 mins"
+            },
+            { 
+                id: 3, name: "REPTO Velachery", 
+                lat: 12.9791, lng: 80.2208, 
+                address: "Plot No.8, 100 Feet Road, Velachery, Chennai - 600042",
+                phone: "+91 44 9876 5432", 
+                hours: "10:00 AM - 8:30 PM (All Days)",
+                services: ["smartphone", "tablet", "pickup"],
+                rating: 4.7,
+                waitTime: "10-25 mins"
+            },
+            { 
+                id: 4, name: "REPTO Adyar", 
+                lat: 13.0065, lng: 80.2567, 
+                address: "No.22, LB Road, Adyar, Chennai - 600020",
+                phone: "+91 44 2345 6789", 
+                hours: "9:30 AM - 8:30 PM (All Days)",
+                services: ["smartphone", "laptop", "tv", "tablet", "pickup"],
+                rating: 4.9,
+                waitTime: "15-25 mins"
+            },
+            { 
+                id: 5, name: "REPTO Porur", 
+                lat: 13.0359, lng: 80.1582, 
+                address: "Mount Poonamallee Road, Porur, Chennai - 600116",
+                phone: "+91 44 3456 7890", 
+                hours: "9:00 AM - 9:00 PM (All Days)",
+                services: ["smartphone", "laptop", "pickup"],
+                rating: 4.5,
+                waitTime: "20-35 mins"
+            },
+            { 
+                id: 6, name: "REPTO OMR", 
+                lat: 12.8394, lng: 80.2325, 
+                address: "OMR, Navalur, Chennai - 603103",
+                phone: "+91 44 4567 8901", 
+                hours: "10:00 AM - 8:00 PM (All Days)",
+                services: ["smartphone", "laptop", "tablet", "tv"],
+                rating: 4.7,
+                waitTime: "15-30 mins"
+            },
+            { 
+                id: 7, name: "REPTO Chromepet", 
+                lat: 12.9566, lng: 80.1404, 
+                address: "GST Road, Chromepet, Chennai - 600044",
+                phone: "+91 44 5678 9012", 
+                hours: "9:00 AM - 9:00 PM (All Days)",
+                services: ["smartphone", "laptop", "pickup"],
+                rating: 4.6,
+                waitTime: "10-20 mins"
+            },
+            { 
+                id: 8, name: "REPTO Tambaram", 
+                lat: 12.9244, lng: 80.1214, 
+                address: "Tambaram West, Chennai - 600045",
+                phone: "+91 44 6789 0123", 
+                hours: "10:00 AM - 8:00 PM (All Days)",
+                services: ["smartphone", "tablet", "tv", "pickup"],
+                rating: 4.5,
+                waitTime: "15-30 mins"
+            }
+        ];
+
+        let userLocation = null;
+        let currentFilter = "all";
+        let storesWithDistance = [];
+
+        // Calculate distance between two points
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Get current location
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('storesList').innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Getting your location...</div>';
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        updateStoresWithDistance();
+                        showMap();
+                    },
+                    () => {
+                        alert('Unable to get your location. Please enter a location manually.');
+                        document.getElementById('storesList').innerHTML = '<div class="loading">📍 Please enter a location to find nearby stores</div>';
+                    }
+                );
+            } else {
+                alert('Geolocation not supported by your browser');
+            }
+        }
+
+        // Search by address
+        function searchLocation() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                alert('Please enter a location to search');
+                return;
+            }
+            
+            // Simulate location search (in real app, use geocoding API)
+            // For demo, we'll use predefined coordinates for common areas
+            const areas = {
+                'anna nagar': { lat: 13.0827, lng: 80.2107 },
+                't nagar': { lat: 13.0438, lng: 80.2337 },
+                'velachery': { lat: 12.9791, lng: 80.2208 },
+                'adyar': { lat: 13.0065, lng: 80.2567 },
+                'porur': { lat: 13.0359, lng: 80.1582 },
+                'omr': { lat: 12.8394, lng: 80.2325 },
+                'chromepet': { lat: 12.9566, lng: 80.1404 },
+                'tambaram': { lat: 12.9244, lng: 80.1214 },
+                'chennai': { lat: 13.0827, lng: 80.2707 }
+            };
+            
+            let found = false;
+            for (let [area, coords] of Object.entries(areas)) {
+                if (searchTerm.toLowerCase().includes(area)) {
+                    userLocation = coords;
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (found) {
+                updateStoresWithDistance();
+                showMap();
+            } else {
+                alert('Location not found. Please try: Anna Nagar, T Nagar, Velachery, Adyar, Porur, OMR, Chromepet, or Tambaram');
+            }
+        }
+
+        // Update stores with distance
+        function updateStoresWithDistance() {
+            if (!userLocation) return;
+            
+            storesWithDistance = stores.map(store => ({
+                ...store,
+                distance: calculateDistance(userLocation.lat, userLocation.lng, store.lat, store.lng)
+            })).sort((a, b) => a.distance - b.distance);
+            
+            renderStores();
+        }
+
+        // Render stores list
+        function renderStores() {
+            let filteredStores = storesWithDistance;
+            
+            if (currentFilter !== 'all') {
+                filteredStores = storesWithDistance.filter(store => 
+                    store.services.includes(currentFilter)
+                );
+            }
+            
+            document.getElementById('storeCount').textContent = filteredStores.length;
+            
+            if (filteredStores.length === 0) {
+                document.getElementById('storesList').innerHTML = '<div class="loading">No stores found for this filter</div>';
+                return;
+            }
+            
+            document.getElementById('storesList').innerHTML = filteredStores.map(store => `
+                <div class="store-card" onclick="showStoreDetails(${store.id})">
+                    <div class="store-name">
+                        <span><i class="fas fa-store"></i> ${store.name}</span>
+                        <span class="store-distance">${store.distance.toFixed(1)} km away</span>
+                    </div>
+                    <div class="store-address">
+                        <i class="fas fa-location-dot"></i> ${store.address}
+                    </div>
+                    <div class="store-hours">
+                        <i class="fas fa-clock"></i> ${store.hours}
+                    </div>
+                    <div class="store-contact">
+                        <i class="fas fa-phone"></i> ${store.phone}
+                    </div>
+                    <div class="store-services">
+                        ${store.services.map(s => `<span class="service-tag">${getServiceName(s)}</span>`).join('')}
+                    </div>
+                    <button class="direction-btn" onclick="event.stopPropagation(); getDirectionsForStore(${store.id})">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function getServiceName(service) {
+            const names = {
+                'smartphone': '📱 Smartphone',
+                'laptop': '💻 Laptop',
+                'tablet': '📟 Tablet',
+                'tv': '📺 TV',
+                'pickup': '🚚 Free Pickup'
+            };
+            return names[service] || service;
+        }
+
+        // Show store details modal
+        function showStoreDetails(storeId) {
+            const store = stores.find(s => s.id === storeId);
+            if (!store) return;
+            
+            document.getElementById('modalStoreName').textContent = store.name;
+            document.getElementById('modalStoreDetails').innerHTML = `
+                <p><i class="fas fa-location-dot"></i> <strong>Address:</strong> ${store.address}</p>
+                <p><i class="fas fa-phone"></i> <strong>Phone:</strong> ${store.phone}</p>
+                <p><i class="fas fa-clock"></i> <strong>Hours:</strong> ${store.hours}</p>
+                <p><i class="fas fa-star"></i> <strong>Rating:</strong> ${store.rating} ⭐</p>
+                <p><i class="fas fa-hourglass-half"></i> <strong>Est. Wait Time:</strong> ${store.waitTime}</p>
+                <p><i class="fas fa-wrench"></i> <strong>Services:</strong> ${store.services.map(s => getServiceName(s)).join(', ')}</p>
+            `;
+            document.getElementById('modalDirectionBtn').onclick = () => getDirectionsForStore(storeId);
+            document.getElementById('storeModal').classList.add('active');
+        }
+
+        function getDirectionsForStore(storeId) {
+            const store = stores.find(s => s.id === storeId);
+            if (store && userLocation) {
+                const url = `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${store.lat},${store.lng}`;
+                window.open(url, '_blank');
+            } else if (store) {
+                const url = `https://www.google.com/maps/search/${store.name}+${store.address}`;
+                window.open(url, '_blank');
+            }
+            closeModal();
+        }
+
+        function getDirections() {
+            const storeName = document.getElementById('modalStoreName').textContent;
+            const store = stores.find(s => s.name === storeName);
+            if (store) {
+                getDirectionsForStore(store.id);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('storeModal').classList.remove('active');
+        }
+
+        // Show map (visual representation)
+        function showMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            if (!userLocation) return;
+            
+            const nearestStores = storesWithDistance.slice(0, 5);
+            mapContainer.innerHTML = `
+                <div style="padding: 1rem; background: #f1f5f9; height: 100%; overflow-y: auto;">
+                    <div style="background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+                        <h4><i class="fas fa-location-dot"></i> Your Location</h4>
+                        <p style="font-size: 0.9rem;">Lat: ${userLocation.lat.toFixed(4)}, Lng: ${userLocation.lng.toFixed(4)}</p>
+                    </div>
+                    <h4>📍 Nearby Stores (${nearestStores.length})</h4>
+                    ${nearestStores.map(store => `
+                        <div style="background: white; border-radius: 12px; padding: 0.8rem; margin-bottom: 0.8rem; border-left: 4px solid #3b82f6;">
+                            <strong>${store.name}</strong>
+                            <div style="font-size: 0.8rem; color: #3b82f6;">${store.distance.toFixed(1)} km away</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">${store.address.substring(0, 60)}...</div>
+                        </div>
+                    `).join('')}
+                    <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #64748b;">
+                        <i class="fas fa-map-marked-alt"></i> Click "Get Directions" on any store for navigation
+                    </p>
+                </div>
+            `;
+        }
+
+        // Filter handlers
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                if (storesWithDistance.length > 0) {
+                    renderStores();
+                }
+            });
+        });
+
+        function goBack() {
+            window.location.href = 'repair.html';
+        }
+
+        // Initialize
+        getCurrentLocation();
+    </script>
+</body>
+</html>

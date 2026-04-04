@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>REPTO Green | Real E-Waste Recycling Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0fdf4;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #064e3b 0%, #065f46 100%);
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: #0a5c4a; }
+        .sidebar::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 4px; }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            overflow: hidden;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        .logo-text h2 { font-size: 1.2rem; font-weight: 700; white-space: nowrap; }
+        .logo-text p { font-size: 0.65rem; color: #bbf7d0; white-space: nowrap; }
+        .sidebar.collapsed .logo-text { display: none; }
+
+        .toggle-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .user-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid #064e3b;
+        }
+
+        .user-info { flex: 1; overflow: hidden; }
+        .user-info h4 { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-info p { font-size: 0.7rem; color: #bbf7d0; }
+        .sidebar.collapsed .user-info { display: none; }
+
+        .nav-menu { padding: 1rem 0; }
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #e2e8f0;
+            position: relative;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: rgba(255,255,255,0.15); color: #fbbf24; border-left: 3px solid #fbbf24; }
+        .nav-item i { width: 24px; font-size: 1.1rem; text-align: center; }
+        .nav-item span { font-size: 0.9rem; font-weight: 500; white-space: nowrap; }
+        .sidebar.collapsed .nav-item span { display: none; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 0.75rem; }
+        .nav-badge { margin-left: auto; background: #f59e0b; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 20px; }
+        .sidebar.collapsed .nav-badge { display: none; }
+
+        .main-content {
+            margin-left: 280px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+        .main-content.expanded { margin-left: 80px; }
+
+        .top-header {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        .menu-toggle { display: none; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; }
+        .page-title h1 { font-size: 1.5rem; font-weight: 700; color: #065f46; }
+        .page-title p { font-size: 0.8rem; color: #64748b; }
+        .header-actions { display: flex; align-items: center; gap: 1rem; }
+        .btn-primary-sm { background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 30px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .content-container { padding: 2rem; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .stat-icon { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin: 0 auto 1rem; }
+        .stat-icon.pending { background: #fef3c7; color: #f59e0b; }
+        .stat-icon.collected { background: #dbeafe; color: #3b82f6; }
+        .stat-icon.progress { background: #c7d2fe; color: #6366f1; }
+        .stat-icon.completed { background: #d1fae5; color: #10b981; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; }
+        .stat-label { font-size: 0.85rem; color: #64748b; }
+
+        .impact-banner {
+            background: linear-gradient(135deg, #064e3b, #10b981);
+            border-radius: 20px;
+            padding: 1.5rem;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            text-align: center;
+        }
+        .impact-value { font-size: 1.5rem; font-weight: 800; }
+
+        .timeline-container {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .timeline-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .timeline-step { flex: 1; text-align: center; position: relative; min-width: 80px; }
+        .timeline-dot {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        .timeline-step.completed .timeline-dot { background: #10b981; color: white; }
+        .timeline-step.active .timeline-dot { background: #3b82f6; color: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.3); }
+        .timeline-label { font-size: 0.75rem; font-weight: 600; }
+        .timeline-date { font-size: 0.65rem; color: #64748b; }
+
+        .status { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+        .status.pending { background: #fef3c7; color: #d97706; }
+        .status.collected { background: #dbeafe; color: #2563eb; }
+        .status.in-progress { background: #c7d2fe; color: #4f46e5; }
+        .status.completed { background: #d1fae5; color: #059669; }
+
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            overflow-x: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; font-size: 0.85rem; }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: #334155; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1100;
+        }
+        .toast.show { display: flex; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+            background: white;
+            border-radius: 20px;
+        }
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: block; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .timeline-steps { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fas fa-leaf"></i></div>
+                <div class="logo-text"><h2>REPTO Green</h2><p>E-Waste Management</p></div>
+            </div>
+            <button class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div class="user-section">
+            <div class="user-avatar"><i class="fas fa-user"></i><div class="online-dot"></div></div>
+            <div class="user-info"><h4 id="userName">--</h4><p>Green Warrior</p></div>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" data-page="dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></div>
+            <div class="nav-item" data-page="requests"><i class="fas fa-truck"></i><span>My Requests</span><span class="nav-badge" id="requestBadge">0</span></div>
+            <div class="nav-item" data-page="schedule"><i class="fas fa-calendar-plus"></i><span>Schedule Pickup</span></div>
+            <div class="nav-item" data-page="impact"><i class="fas fa-globe"></i><span>Environmental Impact</span></div>
+            <div class="nav-item" data-page="centers"><i class="fas fa-store"></i><span>Recycling Centers</span></div>
+            <div class="nav-item" data-page="profile"><i class="fas fa-user-circle"></i><span>My Profile</span></div>
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="top-header">
+            <button class="menu-toggle" onclick="toggleMobileSidebar()"><i class="fas fa-bars"></i></button>
+            <div class="page-title"><h1 id="pageTitle">E-Waste Dashboard</h1><p id="pageDesc">Track your recycling journey</p></div>
+            <div class="header-actions"><button class="btn-primary-sm" id="globalNewRequestBtn"><i class="fas fa-plus"></i> New Request</button></div>
+        </div>
+        <div class="content-container" id="contentContainer"></div>
+    </div>
+    <div id="toast" class="toast"><i class="fas fa-check-circle"></i><span id="toastMsg">Success</span></div>
+
+    <script>
+        // ---------- REAL DATA MODEL - NO DEMO DATA ----------
+        let recyclingData = {
+            name: "",
+            email: "",
+            phone: "",
+            totalRecycled: 0,
+            totalPoints: 0,
+            requests: []   // empty initially, user adds via schedule
+        };
+
+        // Load from localStorage or create fresh empty profile
+        function loadData() {
+            const stored = localStorage.getItem('repto_real_data');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && parsed.requests && Array.isArray(parsed.requests)) {
+                        recyclingData = parsed;
+                    } else {
+                        initEmptyData();
+                    }
+                } catch(e) { initEmptyData(); }
+            } else {
+                initEmptyData();
+            }
+            // Ensure all requests have timeline structure
+            recyclingData.requests = recyclingData.requests.map(r => ({
+                ...r,
+                timeline: r.timeline || { pendingDate: r.date || new Date().toISOString().split('T')[0], collectedDate: null, progressDate: null, completedDate: null }
+            }));
+            saveToLocal();
+        }
+
+        function initEmptyData() {
+            recyclingData = {
+                name: "",
+                email: "",
+                phone: "",
+                totalRecycled: 0,
+                totalPoints: 0,
+                requests: []
+            };
+        }
+
+        function saveToLocal() {
+            // Recalculate totals based on completed requests
+            const completedReqs = recyclingData.requests.filter(r => r.status === 'completed');
+            recyclingData.totalRecycled = completedReqs.reduce((sum, r) => sum + (r.weight || 0), 0);
+            recyclingData.totalPoints = completedReqs.reduce((sum, r) => sum + (r.points || 0), 0);
+            localStorage.setItem('repto_real_data', JSON.stringify(recyclingData));
+        }
+
+        function updateStatsFromData() {
+            const pending = recyclingData.requests.filter(r => r.status === 'pending').length;
+            const collected = recyclingData.requests.filter(r => r.status === 'collected').length;
+            const inProgress = recyclingData.requests.filter(r => r.status === 'in-progress').length;
+            const completed = recyclingData.requests.filter(r => r.status === 'completed').length;
+            const totalWeight = recyclingData.totalRecycled;
+            const totalPoints = recyclingData.totalPoints;
+            document.getElementById('requestBadge').textContent = pending + collected + inProgress;
+            const displayName = recyclingData.name && recyclingData.name.trim() !== "" ? recyclingData.name : "E-Warrior";
+            document.getElementById('userName').innerHTML = displayName;
+            return { pending, collected, inProgress, completed, totalWeight, totalPoints };
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerHTML = msg;
+            toast.style.background = isError ? '#ef4444' : '#10b981';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.style.background = '#10b981';
+            }, 3000);
+        }
+
+        // Render Dashboard
+        function renderDashboard() {
+            const stats = updateStatsFromData();
+            const hasRequests = recyclingData.requests.length > 0;
+            const timelineSteps = [
+                { name: 'Pending', icon: 'fa-clock', desc: 'Request Submitted' },
+                { name: 'Collected', icon: 'fa-truck', desc: 'Items Picked Up' },
+                { name: 'In Progress', icon: 'fa-spinner', desc: 'Processing' },
+                { name: 'Completed', icon: 'fa-check', desc: 'Recycled' }
+            ];
+            // find latest request status for dynamic timeline illustration
+            let latestStatus = null;
+            if (recyclingData.requests.length > 0) {
+                const sorted = [...recyclingData.requests].sort((a,b) => new Date(b.date) - new Date(a.date));
+                latestStatus = sorted[0].status;
+            }
+            let activeStep = 0;
+            if (latestStatus === 'pending') activeStep = 0;
+            else if (latestStatus === 'collected') activeStep = 1;
+            else if (latestStatus === 'in-progress') activeStep = 2;
+            else if (latestStatus === 'completed') activeStep = 3;
+            
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon pending"><i class="fas fa-clock"></i></div><div class="stat-value">${stats.pending}</div><div class="stat-label">Pending Pickup</div></div>
+                    <div class="stat-card"><div class="stat-icon collected"><i class="fas fa-truck"></i></div><div class="stat-value">${stats.collected}</div><div class="stat-label">Collected</div></div>
+                    <div class="stat-card"><div class="stat-icon progress"><i class="fas fa-spinner fa-pulse"></i></div><div class="stat-value">${stats.inProgress}</div><div class="stat-label">In Progress</div></div>
+                    <div class="stat-card"><div class="stat-icon completed"><i class="fas fa-check-circle"></i></div><div class="stat-value">${stats.completed}</div><div class="stat-label">Completed</div></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${stats.totalWeight.toFixed(1)} kg</div><div class="stat-label">Total Recycled</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.totalPoints}</div><div class="stat-label">Green Points</div></div>
+                    <div class="stat-card"><div class="stat-value">${(stats.totalWeight * 2.5).toFixed(1)} kg</div><div class="stat-label">CO₂ Saved</div></div>
+                    <div class="stat-card"><div class="stat-value">${(stats.totalWeight / 20).toFixed(1)}</div><div class="stat-label">Trees Saved</div></div>
+                </div>
+                <div class="timeline-container">
+                    <h3><i class="fas fa-chart-line"></i> Recycling Process Timeline (Latest Request)</h3>
+                    <div class="timeline-steps">
+                        ${timelineSteps.map((step, idx) => `
+                            <div class="timeline-step ${idx <= activeStep ? 'completed' : ''} ${idx === activeStep ? 'active' : ''}">
+                                <div class="timeline-dot"><i class="fas ${step.icon}"></i></div>
+                                <div class="timeline-label">${step.name}</div>
+                                <div class="timeline-date">${step.desc}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${!hasRequests ? '<p style="text-align:center; margin-top:1rem;">📭 No recycling requests yet. Click "New Request" to start your green journey!</p>' : ''}
+                </div>
+                <div class="table-container">
+                    <h3 style="padding:1rem 1rem 0 1rem;">Recent Requests</h3>
+                    ${hasRequests ? `
+                    <table>
+                        <thead><tr><th>ID</th><th>Date</th><th>Items</th><th>Weight</th><th>Status</th><th>Current Stage</th></tr></thead>
+                        <tbody>
+                            ${recyclingData.requests.slice(0,5).map(r => {
+                                let stageText = '';
+                                if (r.status === 'pending') stageText = `Submitted: ${r.timeline.pendingDate}`;
+                                else if (r.status === 'collected') stageText = `Collected: ${r.timeline.collectedDate}`;
+                                else if (r.status === 'in-progress') stageText = `Processing: ${r.timeline.progressDate}`;
+                                else stageText = `Completed: ${r.timeline.completedDate}`;
+                                return `<tr><td>${r.id}</td><td>${r.date}</td><td>${r.items.substring(0,40)}${r.items.length>40?'...':''}</td><td>${r.weight} kg</td><td><span class="status ${r.status}">${r.status === 'in-progress' ? 'In Progress' : r.status}</span></td><td><small>${stageText}</small></td></tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    ` : '<div class="empty-state"><i class="fas fa-recycle fa-2x"></i><p>No requests yet. Schedule your first e-waste pickup!</p></div>'}
+                </div>
+            `;
+        }
+
+        function renderRequests() {
+            const stats = updateStatsFromData();
+            const hasRequests = recyclingData.requests.length > 0;
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${stats.pending}</div><div class="stat-label">Pending</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.collected}</div><div class="stat-label">Collected</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.inProgress}</div><div class="stat-label">In Progress</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.completed}</div><div class="stat-label">Completed</div></div>
+                </div>
+                <div class="table-container">
+                    ${hasRequests ? `
+                    <table>
+                        <thead><tr><th>ID</th><th>Date</th><th>Items</th><th>Weight</th><th>Status</th><th>Submitted</th><th>Collected</th><th>Processing</th><th>Completed</th><th>Points</th><th></th></tr></thead>
+                        <tbody>
+                            ${recyclingData.requests.map((r, idx) => `
+                                <tr>
+                                    <td>${r.id}</td><td>${r.date}</td><td>${r.items.substring(0,35)}</td><td>${r.weight} kg</td>
+                                    <td><span class="status ${r.status}">${r.status === 'in-progress' ? 'In Progress' : r.status}</span></td>
+                                    <td>${r.timeline.pendingDate || '-'}</td><td>${r.timeline.collectedDate || '-'}</td>
+                                    <td>${r.timeline.progressDate || '-'}</td><td>${r.timeline.completedDate || '-'}</td>
+                                    <td><span class="status completed">${r.points || 0} pts</span></td>
+                                    <td><button class="btn-delete" data-idx="${idx}" onclick="deleteRequest('${r.id}')"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ` : '<div class="empty-state"><i class="fas fa-box-open"></i><p>No recycling requests found. Schedule a pickup to get started!</p></div>'}
+                </div>
+            `;
+        }
+
+        window.deleteRequest = function(requestId) {
+            if (confirm("Delete this request permanently? This action cannot be undone.")) {
+                recyclingData.requests = recyclingData.requests.filter(r => r.id !== requestId);
+                saveToLocal();
+                showToast("Request deleted successfully");
+                renderCurrentPage();
+                updateStatsFromData();
+            }
+        };
+
+        function renderSchedule() {
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="form-card">
+                    <h3><i class="fas fa-truck"></i> Schedule New E-Waste Pickup</h3>
+                    <form id="scheduleForm">
+                        <div class="form-group"><label>Items to Recycle *</label><textarea id="itemsList" rows="3" required placeholder="e.g., Old laptop, mobile phone, TV, batteries, CPU"></textarea></div>
+                        <div class="form-group"><label>Estimated Weight (kg) *</label><input type="number" id="estWeight" step="0.1" required placeholder="Approximate weight in kg"></div>
+                        <div class="form-group"><label>Pickup Address *</label><textarea id="pickupAddress" rows="2" required placeholder="Full address with landmark, city, pincode"></textarea></div>
+                        <div class="form-group"><label>Preferred Date</label><input type="date" id="prefDate"></div>
+                        <div class="form-group"><label>Preferred Time Slot</label><select id="timeSlot"><option value="">Any time</option><option value="9-12">9:00 AM - 12:00 PM</option><option value="12-3">12:00 PM - 3:00 PM</option><option value="3-6">3:00 PM - 6:00 PM</option></select></div>
+                        <button type="submit" style="background:#10b981; color:white; padding:0.8rem; border:none; border-radius:40px; width:100%; cursor:pointer; font-weight:600;">Submit Request</button>
+                    </form>
+                </div>`;
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('prefDate');
+            if(dateInput) dateInput.min = today;
+            document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const items = document.getElementById('itemsList').value.trim();
+                const weight = parseFloat(document.getElementById('estWeight').value);
+                const address = document.getElementById('pickupAddress').value.trim();
+                if (!items || !address) { showToast("Please fill items and address", true); return; }
+                if (isNaN(weight) || weight <= 0) { showToast("Please enter a valid weight (>0 kg)", true); return; }
+                const todayStr = new Date().toISOString().split('T')[0];
+                const newId = 'RCY' + Date.now().toString().slice(-8);
+                const newRequest = {
+                    id: newId,
+                    date: todayStr,
+                    items: items,
+                    weight: weight,
+                    status: 'pending',
+                    points: 0,
+                    address: address,
+                    timeline: { pendingDate: todayStr, collectedDate: null, progressDate: null, completedDate: null }
+                };
+                recyclingData.requests.unshift(newRequest);
+                saveToLocal();
+                showToast(`✅ Request ${newId} submitted! Status will be updated by admin.`);
+                setPage('requests');
+            });
+        }
+
+        function renderImpact() {
+            const stats = updateStatsFromData();
+            const waterSaved = stats.totalWeight * 200;
+            const energySaved = stats.totalWeight * 4.5;
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="impact-banner">
+                    <div><i class="fas fa-recycle"></i><div class="impact-value">${stats.totalWeight.toFixed(1)} kg</div><div>E-Waste Recycled</div></div>
+                    <div><i class="fas fa-cloud"></i><div class="impact-value">${(stats.totalWeight * 2.5).toFixed(1)} kg</div><div>CO₂ Saved</div></div>
+                    <div><i class="fas fa-tree"></i><div class="impact-value">${(stats.totalWeight / 20).toFixed(1)}</div><div>Trees Saved</div></div>
+                    <div><i class="fas fa-bolt"></i><div class="impact-value">${energySaved.toFixed(1)} kWh</div><div>Energy Saved</div></div>
+                </div>
+                <div class="timeline-container">
+                    <h3>🌍 Your Environmental Contribution</h3>
+                    ${stats.totalWeight > 0 ? `
+                    <ul style="margin-top:1rem; list-style:none; line-height:2;">
+                        <li>✓ Prevented <strong>${(stats.totalWeight * 2.5).toFixed(1)} kg</strong> of CO₂ emissions</li>
+                        <li>✓ Saved <strong>${energySaved.toFixed(1)} kWh</strong> of energy</li>
+                        <li>✓ Conserved <strong>${waterSaved.toFixed(0)} liters</strong> of water</li>
+                        <li>✓ Protected <strong>${(stats.totalWeight / 20).toFixed(1)} trees</strong></li>
+                        <li>✓ Earned <strong>${stats.totalPoints} Green Points</strong></li>
+                    </ul>
+                    ` : '<p class="empty-state" style="text-align:center;">No recycling activity yet. Start by scheduling a pickup to make an impact! 🌱</p>'}
+                </div>
+            `;
+        }
+
+        function renderCenters() {
+            const centersList = [
+                { name: "REPTO Green Hub - Anna Nagar", address: "No.45, 2nd Avenue, Anna Nagar, Chennai", phone: "+91 44 1234 5678", hours: "9AM - 7PM", distance: "2.5 km" },
+                { name: "REPTO Eco Center - T Nagar", address: "North Usman Road, T Nagar, Chennai", phone: "+91 44 8765 4321", hours: "10AM - 8PM", distance: "3.8 km" },
+                { name: "REPTO Recycling Point - Velachery", address: "100 Feet Road, Velachery, Chennai", phone: "+91 44 9876 5432", hours: "9AM - 8PM", distance: "5.2 km" },
+                { name: "REPTO Sustainable Hub - Adyar", address: "LB Road, Adyar, Chennai", phone: "+91 44 2345 6789", hours: "10AM - 7PM", distance: "4.5 km" }
+            ];
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="stats-grid">
+                    ${centersList.map(c => `
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-store"></i></div>
+                            <h3>${c.name}</h3>
+                            <p><i class="fas fa-location-dot"></i> ${c.address}</p>
+                            <p><i class="fas fa-phone"></i> ${c.phone}</p>
+                            <p><i class="fas fa-clock"></i> ${c.hours}</p>
+                            <p><span class="status completed">${c.distance}</span></p>
+                            <button onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(c.address)}', '_blank')" style="background:#10b981; color:white; border:none; padding:0.5rem; border-radius:30px; width:100%; margin-top:0.5rem; cursor:pointer;">Get Directions</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderProfile() {
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="form-card">
+                    <h3>👤 My Profile</h3>
+                    <div class="form-group"><label>Full Name</label><input type="text" id="profileName" value="${recyclingData.name || ''}" placeholder="Enter your name"></div>
+                    <div class="form-group"><label>Email Address</label><input type="email" id="profileEmail" value="${recyclingData.email || ''}" placeholder="your@email.com"></div>
+                    <div class="form-group"><label>Phone Number</label><input type="tel" id="profilePhone" value="${recyclingData.phone || ''}" placeholder="+91 XXXXXXXXXX"></div>
+                    <button onclick="updateProfile()" style="background:#10b981; color:white; padding:0.8rem; border:none; border-radius:40px; width:100%; cursor:pointer;">Save Profile</button>
+                </div>
+            `;
+        }
+
+        function updateProfile() {
+            recyclingData.name = document.getElementById('profileName').value.trim();
+            recyclingData.email = document.getElementById('profileEmail').value.trim();
+            recyclingData.phone = document.getElementById('profilePhone').value.trim();
+            saveToLocal();
+            updateStatsFromData();
+            showToast('Profile updated successfully!');
+            renderCurrentPage();
+        }
+
+        function renderCurrentPage() {
+            const active = document.querySelector('.nav-item.active').dataset.page;
+            if (active === 'dashboard') renderDashboard();
+            else if (active === 'requests') renderRequests();
+            else if (active === 'schedule') renderSchedule();
+            else if (active === 'impact') renderImpact();
+            else if (active === 'centers') renderCenters();
+            else if (active === 'profile') renderProfile();
+        }
+
+        function setPage(page) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+            const titles = { dashboard: 'Dashboard', requests: 'My Recycling Requests', schedule: 'Schedule Pickup', impact: 'Environmental Impact', centers: 'Recycling Centers', profile: 'My Profile' };
+            document.getElementById('pageTitle').innerHTML = titles[page];
+            renderCurrentPage();
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); document.getElementById('mainContent').classList.toggle('expanded'); }
+        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('mobile-open'); }
+
+        document.querySelectorAll('.nav-item').forEach(item => { item.addEventListener('click', () => setPage(item.dataset.page)); });
+        document.getElementById('globalNewRequestBtn').addEventListener('click', () => setPage('schedule'));
+
+        // Initialize: load REAL data (empty if first time)
+        loadData();
+        updateStatsFromData();
+        setPage('dashboard');
+        window.toggleSidebar = toggleSidebar;
+        window.toggleMobileSidebar = toggleMobileSidebar;
+        window.updateProfile = updateProfile;
+    </script>
+</body>
+</html>
