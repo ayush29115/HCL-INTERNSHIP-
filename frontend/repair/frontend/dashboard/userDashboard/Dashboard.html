@@ -195,6 +195,22 @@
             border-radius: 20px;
         }
 
+        .nav-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 1rem 1.5rem;
+        }
+
+        .nav-item.logout-item {
+            margin-top: 0.5rem;
+            color: #f87171;
+        }
+
+        .nav-item.logout-item:hover {
+            background: rgba(239,68,68,0.1);
+            color: #f87171;
+        }
+
         .main-content {
             margin-left: 280px;
             transition: all 0.3s ease;
@@ -389,7 +405,7 @@
 
         .booking-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 0.8rem;
             margin-bottom: 1rem;
         }
@@ -512,6 +528,40 @@
             display: flex;
         }
 
+        .logout-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-modal.active {
+            display: flex;
+        }
+
+        .logout-modal-content {
+            background: white;
+            border-radius: 28px;
+            max-width: 400px;
+            width: 90%;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .logout-modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
         @media (max-width: 1024px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .charts-section { grid-template-columns: 1fr; }
@@ -563,6 +613,8 @@
             <div class="nav-item" data-page="book"><i class="fas fa-plus-circle"></i><span>New Repair</span></div>
             <div class="nav-item" data-page="profile"><i class="fas fa-user-circle"></i><span>My Profile</span></div>
             <div class="nav-item" data-page="support"><i class="fas fa-headset"></i><span>Support</span></div>
+            <div class="nav-divider"></div>
+            <div class="nav-item logout-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></div>
         </div>
     </div>
 
@@ -583,21 +635,57 @@
         </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="logout-modal">
+        <div class="logout-modal-content">
+            <i class="fas fa-sign-out-alt" style="font-size: 3rem; color: #f97316;"></i>
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to logout from REPTO Pro?</p>
+            <div class="logout-modal-buttons">
+                <button class="btn btn-outline" onclick="closeLogoutModal()">Cancel</button>
+                <button class="btn btn-primary" style="background: #ef4444;" onclick="confirmLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
     <div id="trackModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Repair Progress Tracker</h3><button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button></div><div class="modal-body" id="trackModalBody"></div></div></div>
     <div id="toast" class="toast"><i class="fas fa-check-circle"></i><span id="toastMessage"></span></div>
 
     <script>
-        // Initialize real user data storage - NO DEMO DATA
-        if (!localStorage.getItem('repto_repairs')) localStorage.setItem('repto_repairs', JSON.stringify([]));
-        if (!localStorage.getItem('repto_user')) localStorage.setItem('repto_user', JSON.stringify({ name: '', email: '', phone: '' }));
-        if (!localStorage.getItem('repto_notifications')) localStorage.setItem('repto_notifications', JSON.stringify([]));
+        // Storage keys - MUST MATCH with repair-form.html
+        const STORAGE_KEYS = {
+            REPAIRS: 'repto_repairs',
+            USER: 'repto_user',
+            NOTIFICATIONS: 'repto_notifications'
+        };
 
-        function getRepairs() { return JSON.parse(localStorage.getItem('repto_repairs')) || []; }
-        function saveRepairs(repairs) { localStorage.setItem('repto_repairs', JSON.stringify(repairs)); }
-        function getUser() { return JSON.parse(localStorage.getItem('repto_user')) || { name: '', email: '', phone: '' }; }
-        function saveUser(user) { localStorage.setItem('repto_user', JSON.stringify(user)); }
-        function getNotifications() { return JSON.parse(localStorage.getItem('repto_notifications')) || []; }
-        function saveNotifications(notifs) { localStorage.setItem('repto_notifications', JSON.stringify(notifs)); }
+        // Load data from localStorage
+        function getRepairs() { 
+            const data = localStorage.getItem(STORAGE_KEYS.REPAIRS);
+            return data ? JSON.parse(data) : [];
+        }
+        
+        function saveRepairs(repairs) { 
+            localStorage.setItem(STORAGE_KEYS.REPAIRS, JSON.stringify(repairs));
+        }
+        
+        function getUser() { 
+            const data = localStorage.getItem(STORAGE_KEYS.USER);
+            return data ? JSON.parse(data) : { name: '', email: '', phone: '' };
+        }
+        
+        function saveUser(user) { 
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        }
+        
+        function getNotifications() { 
+            const data = localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS);
+            return data ? JSON.parse(data) : [];
+        }
+        
+        function saveNotifications(notifs) { 
+            localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifs));
+        }
 
         function addNotification(title, message) {
             const notifs = getNotifications();
@@ -608,12 +696,22 @@
 
         function updateNotificationBadge() {
             const unread = getNotifications().filter(n => !n.read).length;
-            document.getElementById('notificationBadge').textContent = unread;
+            const badge = document.getElementById('notificationBadge');
+            if (badge) badge.textContent = unread;
         }
 
-        function showToast(msg) {
+        function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
-            document.getElementById('toastMessage').textContent = msg;
+            const icon = toast.querySelector('i');
+            const msgSpan = document.getElementById('toastMessage');
+            msgSpan.textContent = msg;
+            if (isError) {
+                toast.style.background = '#ef4444';
+                icon.className = 'fas fa-exclamation-circle';
+            } else {
+                toast.style.background = '#10b981';
+                icon.className = 'fas fa-check-circle';
+            }
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
@@ -630,28 +728,37 @@
             const pending = repairs.filter(r => r.status === 'pending').length;
             const inProgress = repairs.filter(r => r.status === 'in-progress').length;
             const completed = repairs.filter(r => r.status === 'completed').length;
-            const totalCost = repairs.reduce((sum, r) => sum + (r.cost || 0), 0);
+            const totalCost = repairs.reduce((sum, r) => sum + (r.estimatedCost || r.cost || 0), 0);
             
             document.getElementById('statsGrid').innerHTML = `
                 <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-tools"></i></div><div class="stat-value">${total}</div><div class="stat-label">Total Repairs</div></div>
                 <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-clock"></i></div><div class="stat-value">${pending + inProgress}</div><div class="stat-label">Active Repairs</div></div>
                 <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-value">${completed}</div><div class="stat-label">Completed</div></div>
-                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-rupee-sign"></i></div><div class="stat-value">₹${totalCost || 0}</div><div class="stat-label">Total Spent</div></div>
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-rupee-sign"></i></div><div class="stat-value">₹${totalCost.toLocaleString()}</div><div class="stat-label">Total Spent</div></div>
             `;
             document.getElementById('activeRepairsBadge').textContent = pending + inProgress;
             
             // Charts with real data
             const deviceMap = {};
-            repairs.forEach(r => { const d = r.device?.split(' ')[0] || 'Other'; deviceMap[d] = (deviceMap[d] || 0) + 1; });
-            const monthlyData = [0,0,0,0,0,0];
-            repairs.forEach(r => { if (r.date) { const month = new Date(r.date).getMonth(); if(month>=0 && month<6) monthlyData[month]++; } });
+            repairs.forEach(r => { 
+                const d = r.deviceModel?.split(' ')[0] || r.device?.split(' ')[0] || 'Other'; 
+                deviceMap[d] = (deviceMap[d] || 0) + 1; 
+            });
+            
+            const monthlyData = [0, 0, 0, 0, 0, 0];
+            repairs.forEach(r => { 
+                if (r.submittedAt) { 
+                    const month = new Date(r.submittedAt).getMonth(); 
+                    if (month >= 0 && month < 6) monthlyData[month]++; 
+                } 
+            });
             
             const ctx1 = document.getElementById('trendChart')?.getContext('2d');
             const ctx2 = document.getElementById('deviceChart')?.getContext('2d');
             if (window.trendChart) window.trendChart.destroy();
             if (window.deviceChart) window.deviceChart.destroy();
-            if(ctx1) window.trendChart = new Chart(ctx1, { type: 'line', data: { labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'], datasets: [{ label: 'Repairs', data: monthlyData, borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59,130,246,0.1)' }] }, options: { responsive: true } });
-            if(ctx2) window.deviceChart = new Chart(ctx2, { type: 'doughnut', data: { labels: Object.keys(deviceMap), datasets: [{ data: Object.values(deviceMap), backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ef4444'] }] }, options: { responsive: true } });
+            if(ctx1) window.trendChart = new Chart(ctx1, { type: 'line', data: { labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'], datasets: [{ label: 'Repairs', data: monthlyData, borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59,130,246,0.1)' }] }, options: { responsive: true, maintainAspectRatio: true } });
+            if(ctx2) window.deviceChart = new Chart(ctx2, { type: 'doughnut', data: { labels: Object.keys(deviceMap).length ? Object.keys(deviceMap) : ['No Data'], datasets: [{ data: Object.values(deviceMap).length ? Object.values(deviceMap) : [1], backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: true } });
             
             renderRecentRepairs();
         }
@@ -660,11 +767,19 @@
             const repairs = getRepairs();
             const active = repairs.filter(r => r.status !== 'completed').slice(0, 3);
             const container = document.getElementById('recentRepairs');
-            if (active.length === 0) { container.innerHTML = '<div class="empty-state">No active repairs. Book your first repair!</div>'; return; }
+            if (active.length === 0) { 
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-tools" style="font-size: 3rem; opacity: 0.3;"></i><p>No active repairs. Book your first repair!</p><button class="btn btn-primary" onclick="showPage(\'book\')" style="margin-top: 1rem;">Book Now →</button></div>'; 
+                return; 
+            }
             container.innerHTML = active.map(r => `
                 <div class="booking-card">
                     <div class="booking-header"><span class="booking-id">${r.id}</span><span class="status ${r.status}">${r.status === 'in-progress' ? 'In Progress' : 'Pending'}</span></div>
-                    <div class="booking-details"><div class="detail-item"><i class="fas fa-mobile-alt"></i> ${r.device || 'N/A'}</div><div class="detail-item"><i class="fas fa-wrench"></i> ${r.issue || 'N/A'}</div><div class="detail-item"><i class="fas fa-calendar"></i> ${r.date || 'N/A'}</div><div class="detail-item"><i class="fas fa-rupee-sign"></i> ₹${r.cost || 0}</div></div>
+                    <div class="booking-details">
+                        <div class="detail-item"><i class="fas fa-mobile-alt"></i> ${r.serviceType || r.device || 'N/A'}</div>
+                        <div class="detail-item"><i class="fas fa-wrench"></i> ${r.issue?.substring(0, 50) || 'N/A'}</div>
+                        <div class="detail-item"><i class="fas fa-calendar"></i> ${r.preferredDate || r.date || 'N/A'}</div>
+                        <div class="detail-item"><i class="fas fa-rupee-sign"></i> ₹${r.estimatedCost || r.cost || 0}</div>
+                    </div>
                     <div class="action-buttons"><button class="btn btn-primary" onclick="trackRepair('${r.id}')">Track Progress</button></div>
                 </div>
             `).join('');
@@ -674,11 +789,22 @@
             const repairs = getRepairs();
             let filtered = filter === 'all' ? repairs : repairs.filter(r => r.status === filter);
             const container = document.getElementById('fullRepairsList');
-            if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">No repairs found</div>'; return; }
+            if (filtered.length === 0) { 
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox" style="font-size: 3rem; opacity: 0.3;"></i><p>No repairs found</p></div>'; 
+                return; 
+            }
             container.innerHTML = filtered.map(r => `
                 <div class="booking-card">
                     <div class="booking-header"><span class="booking-id">${r.id}</span><span class="status ${r.status}">${r.status === 'in-progress' ? 'In Progress' : r.status === 'pending' ? 'Pending' : 'Completed'}</span></div>
-                    <div class="booking-details"><div class="detail-item"><i class="fas fa-mobile-alt"></i> ${r.device || 'N/A'}</div><div class="detail-item"><i class="fas fa-wrench"></i> ${r.issue || 'N/A'}</div><div class="detail-item"><i class="fas fa-calendar"></i> ${r.date || 'N/A'}</div><div class="detail-item"><i class="fas fa-rupee-sign"></i> ₹${r.cost || 0}</div><div class="detail-item"><i class="fas fa-user-cog"></i> ${r.technician || 'Assigned soon'}</div></div>
+                    <div class="booking-details">
+                        <div class="detail-item"><i class="fas fa-tag"></i> ${r.serviceType || r.device || 'N/A'}</div>
+                        <div class="detail-item"><i class="fas fa-wrench"></i> ${r.issue?.substring(0, 50) || 'N/A'}</div>
+                        <div class="detail-item"><i class="fas fa-calendar"></i> ${r.preferredDate || r.date || 'N/A'}</div>
+                        <div class="detail-item"><i class="fas fa-clock"></i> ${r.preferredTime || 'Flexible'}</div>
+                        <div class="detail-item"><i class="fas fa-rupee-sign"></i> ₹${r.estimatedCost || r.cost || 0}</div>
+                        <div class="detail-item"><i class="fas fa-user-cog"></i> ${r.technician || 'To be assigned'}</div>
+                        <div class="detail-item"><i class="fas fa-calendar-week"></i> Booked: ${new Date(r.submittedAt).toLocaleDateString()}</div>
+                    </div>
                     <div class="action-buttons"><button class="btn btn-primary" onclick="trackRepair('${r.id}')">Track Progress</button></div>
                 </div>
             `).join('');
@@ -689,9 +815,16 @@
             if (!repair) return;
             const progress = repair.status === 'pending' ? 25 : repair.status === 'in-progress' ? 60 : 100;
             document.getElementById('trackModalBody').innerHTML = `
-                <div><strong>ID:</strong> ${repair.id}<br><strong>Device:</strong> ${repair.device}<br><strong>Issue:</strong> ${repair.issue}<br><strong>Technician:</strong> ${repair.technician || 'To be assigned'}<br><strong>Cost:</strong> ₹${repair.cost}<br><strong>Status:</strong> ${repair.status}<br><strong>Date:</strong> ${repair.date}</div>
+                <div><strong>Repair ID:</strong> ${repair.id}</div>
+                <div><strong>Service:</strong> ${repair.serviceType || repair.device}</div>
+                <div><strong>Issue:</strong> ${repair.issue}</div>
+                <div><strong>Technician:</strong> ${repair.technician || 'To be assigned'}</div>
+                <div><strong>Estimated Cost:</strong> ₹${repair.estimatedCost || repair.cost || 0}</div>
+                <div><strong>Status:</strong> ${repair.status === 'pending' ? 'Pending' : repair.status === 'in-progress' ? 'In Progress' : 'Completed'}</div>
+                <div><strong>Preferred Date:</strong> ${repair.preferredDate || repair.date || 'N/A'}</div>
+                <div><strong>Service Mode:</strong> ${repair.serviceMode === 'pickup' ? 'Pickup & Drop' : 'Store Visit'}</div>
                 <div style="background:#e2e8f0; border-radius:10px; height:8px; margin-top:1rem;"><div style="width:${progress}%; background:#3b82f6; height:100%; border-radius:10px;"></div></div>
-                <p style="margin-top:1rem;">${repair.status === 'pending' ? 'Estimated: 2-3 days' : repair.status === 'in-progress' ? 'Estimated: 1-2 days' : 'Completed'}</p>
+                <p style="margin-top:1rem;">${repair.status === 'pending' ? '⏳ Estimated: 2-3 days' : repair.status === 'in-progress' ? '🔧 Estimated: 1-2 days' : '✅ Repair completed successfully!'}</p>
             `;
             document.getElementById('trackModal').classList.add('active');
         }
@@ -701,40 +834,139 @@
 
         function showNotifications() {
             const notifs = getNotifications();
-            if (notifs.length === 0) alert('No notifications yet');
-            else alert(notifs.map(n => `🔔 ${n.title}\n${n.message}\n${n.time}`).join('\n\n'));
+            const container = document.getElementById('notificationsList');
+            if (!container) return;
+            
+            if (notifs.length === 0) {
+                container.innerHTML = '<div class="empty-state">No notifications yet</div>';
+            } else {
+                container.innerHTML = notifs.map(n => `
+                    <div class="notification-item">
+                        <strong>${n.title}</strong>
+                        <p style="font-size: 0.85rem; margin: 0.3rem 0;">${n.message}</p>
+                        <small style="color: #64748b;">${n.time}</small>
+                    </div>
+                `).join('');
+            }
+            
+            let modal = document.getElementById('notificationsModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'notificationsModal';
+                modal.className = 'modal';
+                modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h3><i class="fas fa-bell"></i> Notifications</h3><button onclick="closeModalById('notificationsModal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button></div><div class="modal-body" id="notificationsList"></div></div>`;
+                document.body.appendChild(modal);
+            }
+            modal.querySelector('.modal-body').innerHTML = container.innerHTML;
+            modal.classList.add('active');
+            
             const updated = notifs.map(n => ({ ...n, read: true }));
             saveNotifications(updated);
             updateNotificationBadge();
         }
 
-        function contactSupport() { alert('📞 REPTO Support\nEmail: support@repto.com\nPhone: +91 98765 43210\nHours: 24/7'); }
+        function closeModalById(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('active');
+        }
+
+        function contactSupport() { 
+            alert('📞 REPTO Support\nEmail: support@repto.com\nPhone: +91 98765 43210\nHours: 24/7'); 
+        }
 
         function renderBookingForm() {
             document.getElementById('bookingFormContainer').innerHTML = `
                 <form id="newRepairForm" style="text-align:left; max-width:500px; margin:0 auto;">
-                    <div class="form-group"><label>Device Type *</label><input type="text" id="repairDevice" placeholder="e.g., iPhone 14, MacBook Pro" required></div>
+                    <div class="form-group"><label>Service Type *</label>
+                        <select id="repairService" required>
+                            <option value="">Select Service</option>
+                            <option value="Smartphone Repair">Smartphone Repair</option>
+                            <option value="Laptop Repair">Laptop Repair</option>
+                            <option value="Tablet Repair">Tablet Repair</option>
+                            <option value="TV Repair">TV Repair</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Device Model</label><input type="text" id="repairDevice" placeholder="e.g., iPhone 14, MacBook Pro"></div>
                     <div class="form-group"><label>Issue Description *</label><textarea id="repairIssue" rows="3" placeholder="Describe the problem" required></textarea></div>
-                    <div class="form-group"><label>Estimated Budget (₹)</label><input type="number" id="repairCost" placeholder="0"></div>
+                    <div class="form-group"><label>Service Mode *</label>
+                        <select id="repairMode" required>
+                            <option value="store">Visit Store</option>
+                            <option value="pickup">Free Pick-up & Drop</option>
+                        </select>
+                    </div>
                     <div class="form-group"><label>Preferred Date</label><input type="date" id="repairDate"></div>
+                    <div class="form-group"><label>Estimated Budget (₹)</label><input type="number" id="repairCost" placeholder="0"></div>
+                    <div class="form-group" id="addressField" style="display: none;">
+                        <label>Pick-up Address</label><textarea id="pickupAddress" rows="2" placeholder="Enter your full address"></textarea>
+                    </div>
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="customerName" required></div>
+                    <div class="form-group"><label>Phone Number *</label><input type="tel" id="customerPhone" required placeholder="10-digit mobile number"></div>
                     <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-paper-plane"></i> Submit Repair Request</button>
                 </form>
             `;
+            
+            document.getElementById('repairMode').addEventListener('change', function() {
+                const addressField = document.getElementById('addressField');
+                addressField.style.display = this.value === 'pickup' ? 'block' : 'none';
+            });
+            
             document.getElementById('newRepairForm').addEventListener('submit', function(e) {
                 e.preventDefault();
+                const serviceType = document.getElementById('repairService').value;
                 const device = document.getElementById('repairDevice').value;
                 const issue = document.getElementById('repairIssue').value;
-                const cost = parseInt(document.getElementById('repairCost').value) || 0;
+                const mode = document.getElementById('repairMode').value;
                 const date = document.getElementById('repairDate').value || new Date().toISOString().split('T')[0];
-                if (!device || !issue) { alert('Please fill device and issue'); return; }
+                const cost = parseInt(document.getElementById('repairCost').value) || 0;
+                const customerName = document.getElementById('customerName').value;
+                const customerPhone = document.getElementById('customerPhone').value;
+                const address = mode === 'pickup' ? document.getElementById('pickupAddress').value : 'Store Visit';
+                
+                if (!serviceType || !issue || !customerName || !customerPhone) {
+                    showToast('Please fill all required fields!', true);
+                    return;
+                }
+                
+                if (!/^\d{10}$/.test(customerPhone)) {
+                    showToast('Please enter a valid 10-digit phone number!', true);
+                    return;
+                }
+                
                 const repairs = getRepairs();
-                const newId = 'RPT' + (Date.now()).toString().slice(-8);
-                const newRepair = { id: newId, device, issue, status: 'pending', date, cost, technician: 'To be assigned', progress: 0 };
+                const newId = 'RPT' + Date.now().toString().slice(-8);
+                const newRepair = { 
+                    id: newId, 
+                    serviceType: serviceType,
+                    deviceModel: device || 'Not specified',
+                    device: device || serviceType,
+                    issue: issue, 
+                    status: 'pending', 
+                    date: date,
+                    preferredDate: date,
+                    preferredTime: 'Flexible',
+                    serviceMode: mode,
+                    estimatedCost: cost,
+                    cost: cost,
+                    customerName: customerName,
+                    customerPhone: customerPhone,
+                    address: address,
+                    technician: 'To be assigned', 
+                    progress: 0,
+                    submittedAt: new Date().toISOString()
+                };
                 repairs.unshift(newRepair);
                 saveRepairs(repairs);
-                addNotification('✅ New Repair Booked', `Your repair for ${device} has been booked. ID: ${newId}`);
+                
+                const user = getUser();
+                user.name = customerName;
+                user.phone = customerPhone;
+                saveUser(user);
+                
+                addNotification('✅ New Repair Booked', `Your ${serviceType} repair (ID: ${newId}) has been booked successfully. We'll contact you within 2 hours.`);
                 showToast(`Repair booked! ID: ${newId}`);
+                
                 document.getElementById('newRepairForm').reset();
+                document.getElementById('addressField').style.display = 'none';
                 showPage('repairs');
                 updateDashboard();
             });
@@ -784,16 +1016,81 @@
             document.getElementById('sidebar').classList.toggle('collapsed');
             document.getElementById('mainContent').classList.toggle('expanded');
         }
-        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('mobile-open'); }
-        function closeModal() { document.getElementById('trackModal').classList.remove('active'); }
+        
+        function toggleMobileSidebar() { 
+            document.getElementById('sidebar').classList.toggle('mobile-open'); 
+        }
+        
+        function closeModal() { 
+            document.getElementById('trackModal').classList.remove('active'); 
+        }
 
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => { showPage(item.dataset.page); if(window.innerWidth<=768) document.getElementById('sidebar').classList.remove('mobile-open'); });
+        // Logout Functions
+        function showLogoutModal() {
+            document.getElementById('logoutModal').classList.add('active');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('active');
+        }
+
+        function confirmLogout() {
+            closeLogoutModal();
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            showToast('🔐 Logged out successfully!');
+            setTimeout(() => {
+                window.location.href = '../../../../select.html';
+            }, 1000);
+        }
+
+        // Navigation and Event Listeners
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => { 
+                showPage(item.dataset.page); 
+                if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('mobile-open'); 
+            });
         });
+        
+        document.getElementById('logoutBtn')?.addEventListener('click', showLogoutModal);
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal') || event.target.classList.contains('logout-modal')) {
+                event.target.classList.remove('active');
+            }
+        }
 
+        // Set min date for date picker
+        const dateInput = document.getElementById('repairDate');
+        if (dateInput) dateInput.min = new Date().toISOString().split('T')[0];
+
+        // Initialize
         updateUserDisplay();
         updateDashboard();
         showPage('dashboard');
+        
+        // Listen for storage events from repair form
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEYS.REPAIRS) {
+                updateDashboard();
+                if (document.querySelector('.nav-item.active')?.dataset?.page === 'repairs') {
+                    renderFullRepairs('all');
+                }
+            }
+        });
+
+        // Make functions global
+        window.toggleSidebar = toggleSidebar;
+        window.toggleMobileSidebar = toggleMobileSidebar;
+        window.closeModal = closeModal;
+        window.closeModalById = closeModalById;
+        window.showRepairTab = showRepairTab;
+        window.showFullRepairTab = showFullRepairTab;
+        window.showNotifications = showNotifications;
+        window.contactSupport = contactSupport;
+        window.trackRepair = trackRepair;
+        window.showPage = showPage;
+        window.closeLogoutModal = closeLogoutModal;
+        window.confirmLogout = confirmLogout;
     </script>
 </body>
 </html>

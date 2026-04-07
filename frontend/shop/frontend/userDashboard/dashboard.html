@@ -749,10 +749,16 @@
         document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
     }
     
-    function performLogout() {
-        showToast("🔐 Logging out...");
-        setTimeout(() => { window.location.href = "../shop.html" }, 500);
-    }
+   function performLogout() {
+    showToast("🔐 Logging out...");
+
+    localStorage.removeItem("repto_token");
+    localStorage.removeItem("repto_user");
+
+    setTimeout(() => {
+        window.location.href = "../../../select.html";
+    }, 500);
+}
     
     function showLogoutModal() { document.getElementById('logoutModal').classList.add('active'); }
     function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('active'); }
@@ -768,11 +774,14 @@
         else renderDashboard();
     }
     
-    function init() {
-        loadRealUserData();
-        refreshUI();
-        renderDashboard();
-        
+   function init() {
+    if (!checkAuth()) return;
+
+    loadRealUserData();
+    loadLoggedInUser();   // 👈 important
+    refreshUI();
+    renderDashboard();
+
         window.addEventListener('storage', (e) => {
             if (e.key === STORAGE_KEYS.ORDERS || e.key === STORAGE_KEYS.WISHLIST || 
                 e.key === STORAGE_KEYS.CART || e.key === STORAGE_KEYS.ADDRESSES) {
@@ -805,6 +814,27 @@
     window.closeAddAddressModal = closeAddAddressModal;
     
     init();
+
+function loadLoggedInUser() {
+    const storedUser = JSON.parse(localStorage.getItem("repto_user"));
+
+    if (storedUser) {
+        userProfile.name = storedUser.name;
+        userProfile.email = storedUser.contact || storedUser.email;
+        userProfile.firstName = storedUser.name.split(" ")[0];
+    }
+}
+function checkAuth() {
+    const token = localStorage.getItem("repto_token");
+    const user = localStorage.getItem("repto_user");
+
+    if (!token || !user) {
+        window.location.href = "../../../select.html";
+        return false;
+    }
+    return true;
+}
+
 </script>
 </body>
 </html>
